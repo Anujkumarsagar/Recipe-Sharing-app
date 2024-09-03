@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide scrollbars */
+.scrollbar-thin::-webkit-scrollbar {
+  display: none;
+}
+
+.dotUnderline {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 2px;
+  }
+  
+  .dotUnderline::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    border-bottom: 2px solid black;
+    transition: width 0.3s ease-in-out;
+    z-index: 1; /* Ensure it's above other elements */
+  }
+  
+  .dotUnderline:hover::after {
+    width: 100%;
+  }
+  
