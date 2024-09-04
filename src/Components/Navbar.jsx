@@ -4,7 +4,7 @@ import EnhancedLoginToggle from './EnhancedLoginToggle';
 
 const Navbar = () => {
   const [loginToggle, setLoginToggle] = useState(false);
-  const [User, setUser] = useState(false)
+  const [User, setUser] = useState(true)
   return (
     <header className="transition w-11/12 m-auto flex items-center justify-between h-16 px-4 md:px-6 bg-background border-b">
       {/* Navigation Section */}
@@ -64,19 +64,23 @@ const Navbar = () => {
 
         {/* User Profile Button */}
         {User && <button
-          className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 rounded-full"
+          className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium 
+          rounded-full
+          ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none 
+          border-2 
+          p-5 disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 "
           type="button"
           aria-haspopup="menu"
           aria-expanded="false"
           data-state="closed"
         >
           <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
-            <img className="aspect-square h-full w-full" alt="User" src="/placeholder-user.jpg" />
+            <img className="aspect-square h-full w-full  " alt="User" src="https://gravatar.com/avatar/1d1106d0b15053200c50c641d2d5bbd7?s=400&d=robohash&r=x" />
           </span>
         </button>
         }
         {/* Login Button */}
-        <Link
+        {!User && <Link
           className="hidden md:inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-medium dotUnderline"
           to="/login"
           rel="ugc"
@@ -98,7 +102,7 @@ const Navbar = () => {
             <line x1="15" x2="3" y1="12" y2="12"></line>
           </svg>
           Login
-        </Link>
+        </Link>}
       </div>
 
       {/* Conditional Login Toggle */}

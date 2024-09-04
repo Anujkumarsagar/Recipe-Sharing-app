@@ -4,6 +4,7 @@ import HeroPage from './Pages/HeroPage';
 import RecipeComponent from './Pages/RecipeComponent';
 import Navbar from './Components/Navbar';
 import EnhancedLoginToggle from './Components/EnhancedLoginToggle';
+import ProfileDashboard from './Components/ProfileDashboard';
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
           <Navbar />
         </div>
         <Routes>
-          <Route path="/" element={<HeroPage />} />
+          <Route path="/" element={<ProfileDashboard/>} />
+          {/* <Route path="/" element={<HeroPage />} /> */}
           <Route path="/Recipes" element={<RecipeComponent />} /> {/* Example route */}
           <Route path='/login' element={<EnhancedLoginToggle/>} />
         </Routes>
