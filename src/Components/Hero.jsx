@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import CarouselJSX from "../Utils/CarouselJSX";
+import PopCardForRecipe from "./PopCardForRecipe";
+import UserTestimonials from "./UserTestimonials";
+import PopularChefs from "./PopularChefs";
+import Footer from "./Footer";
 export default function Hero() {
     return (
         <div className="flex flex-col w-4/5 m-auto ">
             {/* Hero Section */}
-            <section className="  py-12 md:py-24 lg:py-32">
+            <video autoPlay muted loop  className="background-video">
+                <source src="https://videos.pexels.com/video-files/2081576/2081576-hd_1920_1080_30fps.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            <section className=" backgroundImage py-12 md:py-24 lg:py-32">
                 <div className="container  m-auto  justify-between grid grid-cols-1 md:grid-cols-2 gap-8 px-4 md:px-6">
                     <div className="flex flex-col justify-center space-y-4">
                         <div className="space-y-2">
@@ -31,7 +39,7 @@ export default function Hero() {
                     </div>
                     {/* Hero Image Section */}
                     <div className="relative border-black border-2 overflow-hidden rounded-lg group">
-                        <a href="#" className="absolute inset-0 z-10">
+                        <a href="#" className="absolute inset-0 ">
                             <span className="sr-only">View Recipe</span>
                         </a>
                         <img
@@ -64,7 +72,22 @@ export default function Hero() {
             </section>
 
             <section>
-                <CarouselJSX/>
+                <CarouselJSX />
+            </section>
+
+
+            <section>
+            <UserTestimonials />
+            </section>
+        
+                    
+
+            <section>
+                <PopularChefs />
+            </section>
+
+            <section>
+                <Footer />
             </section>
         </div>
     );
@@ -100,7 +123,7 @@ function FilterDropdown() {
         <div className="relative">
             <button
                 onClick={toggleDropdown}
-                className="rounded-md px-4 py-2 text-sm border border-gray-300 flex items-center"
+                className=" z-50 rounded-md px-4 py-2 text-sm border border-gray-300 flex items-center"
             >
                 <FilterIcon className="w-4 h-4 mr-2" />
                 Filter
@@ -128,68 +151,63 @@ function FilterDropdown() {
         </div>
     );
 }
-
 function RecipeCard({ recipe }) {
+    const [selectedRecipe, setSelectedRecipe] = useState(null); // State to keep track of the selected recipe
+
+    const handleCloseRecipe = () => {
+        setSelectedRecipe(null); // Close the pop-up by setting the selected recipe to null
+    };
+
     return (
         <div className="relative border-2 p-2 overflow-hidden rounded-lg group">
-            <a href="#" className="absolute inset-0 z-10">
+            {/* Clickable link to open the pop-up */}
+            <Link
+                to="#"
+                className="absolute inset-0 z-10"
+                onClick={(e) => {
+                    e.preventDefault(); // Prevent default link behavior
+                    setSelectedRecipe(recipe); // Set the selected recipe state
+                }}
+            >
                 <span className="sr-only">View Recipe</span>
-            </a>
+            </Link>
+            {/* Display recipe image and information */}
             <img
                 src={recipe.image}
                 alt="Recipe Image"
                 width={300}
                 height={200}
-                className="object-cover w-full h-60 group-hover:opacity-50 transition-opacity"
+                className="cards object-cover w-full h-60 group-hover:opacity-50 transition-opacity"
                 style={{ aspectRatio: "300/200", objectFit: "cover" }}
             />
             <div className="p-4">
                 <h3 className="text-lg font-semibold text-foreground">{recipe.title}</h3>
                 <p className="text-muted-foreground">{recipe.description}</p>
             </div>
+            {/* Conditionally render the pop-up if a recipe is selected */}
+            {selectedRecipe && (
+                <PopCardForRecipe
+                    handleCloseRecipe={handleCloseRecipe} // Pass the close handler to the pop-up component
+                    selectedRecipe={selectedRecipe}
+                />
+            )}
         </div>
     );
 }
 
+
 const recipeData = [
     {
+        id: 1,
         title: "Grilled Salmon with Lemon Dill Sauce",
         description: "Tender salmon fillets grilled to perfection and topped with a bright and tangy lemon dill sauce.",
         image: "https://placehold.co/600x400",
     },
     {
+        id: 2,
+
         title: "Vegetable Stir-Fry with Tofu",
         description: "A colorful and flavorful stir-fry with fresh vegetables and crispy tofu in a savory sauce.",
-        image: "https://placehold.co/600x400",
-    },
-    {
-        title: "Classic Beef Lasagna",
-        description: "Layers of pasta, ground beef, ricotta, and melted cheese baked to perfection.",
-        image: "https://placehold.co/600x400",
-    },
-    {
-        title: "Vegetable Stir-Fry with Tofu",
-        description: "A colorful and flavorful stir-fry with fresh vegetables and crispy tofu in a savory sauce.",
-        image: "https://placehold.co/600x400",
-    },
-    {
-        title: "Classic Beef Lasagna",
-        description: "Layers of pasta, ground beef, ricotta, and melted cheese baked to perfection.",
-        image: "https://placehold.co/600x400",
-    },
-        {
-            title: "Vegetable Stir-Fry with Tofu",
-            description: "A colorful and flavorful stir-fry with fresh vegetables and crispy tofu in a savory sauce.",
-            image: "https://placehold.co/600x400",
-        },
-        {
-            title: "Classic Beef Lasagna",
-            description: "Layers of pasta, ground beef, ricotta, and melted cheese baked to perfection.",
-            image: "https://placehold.co/600x400",
-        },
-    {
-        title: "Lemon Garlic Shrimp Scampi",
-        description: "Succulent shrimp in a buttery, garlicky lemon sauce, perfect over pasta or rice.",
         image: "https://placehold.co/600x400",
     },
 ];

@@ -1,42 +1,49 @@
 import { useState } from 'react';
 import { PlusIcon, BookOpenIcon, UserIcon, CogIcon } from 'lucide-react';
-import PopCardForRecipe from './PopCardForRecipe';
-import { Link } from 'react-router-dom';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import MyRecipes from './MyRecipes';
+import Profile from './Profile.jsx';
+import Settings from './Settings.jsx';
 
 const recipesData = [
   {
-    id: 1,
-    title: "Spaghetti Carbonara",
-    category: "Pasta",
-    image: "/placeholder.svg?height=200&width=300",
-    description: "Classic Italian pasta dish with eggs, cheese, and pancetta",
-    author: "Chef John",
-    likes: 120,
+    id: 6,
+    title: "Chocolate Chip Cookies",
+    image: "https://example.com/chocolate-chip-cookies.jpg",
+    description: "Soft and chewy cookies loaded with chocolate chips.",
+    likes: 250,
     ingredients: [
-      "400g spaghetti",
-      "200g pancetta",
-      "4 large eggs",
-      "100g Pecorino cheese",
-      "100g Parmesan",
-      "Freshly ground black pepper",
+      "2 1/4 cups all-purpose flour",
+      "1/2 teaspoon baking soda",
+      "1/2 teaspoon baking powder",
+      "1/4 teaspoon salt",
+      "1/2 cup unsalted butter, room temperature",
+      "1/2 cup granulated sugar",
+      "1/2 cup packed brown sugar",
+      "1 large egg",
+      "1 teaspoon vanilla extract",
+      "1 cup semi-sweet chocolate chips"
     ],
     instructions: [
-      "Cook spaghetti in a large pot of boiling salted water.",
-      "Fry pancetta with a little olive oil until crispy.",
-      "Whisk eggs and cheese in a bowl.",
-      "Drain pasta, reserving some cooking water.",
-      "Mix pasta with pancetta, then add egg mixture off the heat.",
-      "Add cooking water if needed to create a creamy sauce.",
-      "Season with black pepper and serve immediately.",
-    ],
+      "Preheat your oven to 350°F (175°C). Line a baking sheet with parchment paper.",
+      "In a medium bowl, whisk together the flour, baking soda, baking powder, and salt. Set aside.",
+      "In a large bowl, cream together the butter, granulated sugar, and brown sugar until light and fluffy.",
+      "Beat in the egg and vanilla extract until well combined.",
+      "Gradually add the dry ingredients to the butter mixture, mixing until just combined.",
+      "Fold in the chocolate chips.",
+      "Drop rounded tablespoons of dough onto the prepared baking sheet, spacing them about 2 inches apart.",
+      "Bake for 10-12 minutes, or until the edges are golden brown but the centers are still soft.",
+      "Allow the cookies to cool on the baking sheet for 5 minutes before transferring to a wire rack to cool completely."
+    ]
   },
-  // Add more recipes as needed
+  // Other recipe objects...
 ];
 
 export default function ProfileDashboard() {
-  const [userLoggedIn, setUserLoggedIn] = useState(true); // Example state, replace with your actual logic
+  const [userLoggedIn, setUserLoggedIn] = useState(true);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [recipes, setRecipes] = useState(recipesData);
+  const location = useLocation();
 
   const handleRecipeClick = (recipe) => {
     setSelectedRecipe(recipe);
@@ -50,70 +57,53 @@ export default function ProfileDashboard() {
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex">
         {/* Sidebar */}
-        <aside className={`hidden md:block w-64 mr-8 ${userLoggedIn ? 'bg-gray-100' : ''}`}>
+        <aside className={`lg:flex max-sm:hidden w-64 mr-8 ${userLoggedIn ? 'bg-gray-100' : ''}`}>
           <nav className="space-y-2">
             <Link
-              to=""
-              className={`flex items-center space-x-3 text-gray-700 p-2 rounded-lg font-medium hover:bg-gray-200 ${userLoggedIn ? 'bg-gray-200' : ''}`}
+              to="myrecipes"
+              className={`flex items-center space-x-3 text-gray-700 p-2 rounded-lg font-medium hover:bg-gray-200 ${location.pathname === '/profile/myrecipes' ? 'bg-gray-200' : ''}`}
               aria-label="My Recipes"
             >
               <BookOpenIcon className="h-6 w-6" />
-              <span className={`font-bold ${userLoggedIn ? 'text-gray-900' : 'text-gray-700'}`}>My Recipes</span>
+              <span className={`font-bold`}>My Recipes</span>
             </Link>
-            <a
-              href="#"
-              className="flex items-center space-x-3 text-gray-700 p-2 rounded-lg font-medium hover:bg-gray-200"
+            <Link
+              to="profile"
+              className={`flex items-center space-x-3 text-gray-700 p-2 rounded-lg font-medium hover:bg-gray-200 ${location.pathname === '/profile/profile' ? 'bg-gray-200' : ''}`}
               aria-label="Profile"
             >
               <UserIcon className="h-6 w-6" />
               <span>Profile</span>
-            </a>
-            <a
-              href="#"
-              className="flex items-center space-x-3 text-gray-700 p-2 rounded-lg font-medium hover:bg-gray-200"
+            </Link>
+            <Link
+              to="settings"
+              className={`flex items-center space-x-3 text-gray-700 p-2 rounded-lg font-medium hover:bg-gray-200 ${location.pathname === '/profile/settings' ? 'bg-gray-200' : ''}`}
               aria-label="Settings"
             >
               <CogIcon className="h-6 w-6" />
               <span>Settings</span>
-            </a>
+            </Link>
           </nav>
         </aside>
 
-        {/* Main content */}
+        {/* Main Content with Nested Routes */}
         <main className="flex-1">
-          {userLoggedIn ? (
-            <>
-              <h2 className="text-3xl font-bold leading-tight tracking-tighter text-gray-900 mb-4">My Recipes</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 scrollbar-thin">
-                {recipes.map(recipe => (
-                  <div
-                    key={recipe.id}
-                    className="border border-gray-300 rounded-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105"
-                    onClick={() => handleRecipeClick(recipe)}
-                    aria-label={`View details for ${recipe.title}`}
-                  >
-                    <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
-                    <div className="p-4">
-                      <h3 className="text-xl font-semibold mb-2">{recipe.title}</h3>
-                      <p className="text-gray-600">{recipe.description}</p>
-                    </div>
-                    <div className="p-4 flex items-center text-xs font-bold">
-                      <img src="../3d-star.svg" className="w-4 h-4 mr-1" alt="Star" />
-                      {recipe.likes}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="text-center text-gray-600">Please log in to view your recipes.</div>
-          )}
+          <Routes>
+            {/* Default route */}
+            <Route path="myrecipes" element={
+              <MyRecipes
+                userLoggedIn={userLoggedIn}
+                recipes={recipes}
+                handleRecipeClick={handleRecipeClick}
+                selectedRecipe={selectedRecipe}
+                handleCloseRecipe={handleCloseRecipe}
+              />
+            } />
+            <Route path="profile" element={<Profile userLoggedIn={userLoggedIn} />} />
+            <Route path="settings" element={<Settings userLoggedIn={userLoggedIn} />} />
+          </Routes>
         </main>
       </div>
-
-      {selectedRecipe && (
-        <PopCardForRecipe selectedRecipe={selectedRecipe} handleCloseRecipe={handleCloseRecipe} />
-      )}
 
       {/* Floating Action Button */}
       <button

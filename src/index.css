@@ -8,24 +8,104 @@
 }
 
 .dotUnderline {
-    position: relative;
-    display: inline-block;
-    padding-bottom: 2px;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 2px;
+}
+
+.dotUnderline::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  border-bottom: 2px solid black;
+  transition: width 0.3s ease-in-out;
+  z-index: 1;
+  /* Ensure it's above other elements */
+}
+
+.dotUnderline:hover::after {
+  width: 100%;
+}
+
+
+img {
+  content: url('https://placehold.co/600x400');
+}
+
+
+.background-video {
+  position: absolute;
+  top: 50%;
+  /* Center vertically */
+  left: 50%;
+  /* Center horizontally */
+  width: 100%;
+  /* Full width */
+  height: 100%;
+  /* Full height */
+  object-fit: cover;
+  /* Cover the entire container */
+  transform: translate(-50%, -50%);
+  /* Center the video */
+  z-index: -1;
+  /* Place the video behind the overlay content */
+}
+
+/* A/* Basic styles for the text container */
+.animated-text {
+  display: flex; /* Flexbox to arrange spans in a row */
+  font-size: 2rem; /* Adjust font size as needed */
+  font-weight: bolder; /* Bold text */
+  overflow: hidden; /* Prevent overflow */
+}
+
+/* Apply gradient color to text */
+.animated-text {
+  background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
+  -webkit-background-clip: text; /* Clip gradient to text */
+  -webkit-text-fill-color: black; /* Make text color transparent to show gradient */
+  background-clip: text; /* For non-WebKit browsers */
+  display: inline-block; /* Ensure gradient applies to text */
+}
+
+/* Style for each span */
+.animated-text span {
+  display: inline-block;
+  animation: animateCharacter 2s linear forwards; /* Apply animation */
+}
+
+@keyframes animateCharacter {
+  0% {
+    opacity: 0; /* Start invisible */
+    transform: translateY(20px); /* Start from below */
   }
-  
-  .dotUnderline::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    width: 0;
-    border-bottom: 2px solid black;
-    transition: width 0.3s ease-in-out;
-    z-index: 1; /* Ensure it's above other elements */
+  15% {
+    opacity: 0.5; /* Partially visible */
+    transform: translateY(10px); /* Move closer */
   }
-  
-  .dotUnderline:hover::after {
-    width: 100%;
+  30% {
+    opacity: 1; /* Fully visible */
+    transform: translateY(5px); /* Near normal position */
   }
+  50% {
+    opacity: 1; /* Fully visible */
+    transform: translateY(0px); /* Normal position */
+  }
+  70% {
+    opacity: 1; /* Fully visible */
+    transform: translateY(-5px); /* Move up */
+  }
+  85% {
+    opacity: 0.5; /* Partially visible */
+    transform: translateY(-10px); /* Move back towards normal */
+  }
+  100% {
+    opacity: 1; /* Start invisible again */
+    transform: translateY(0px); /* Move back down */
+  }
+}
+
   

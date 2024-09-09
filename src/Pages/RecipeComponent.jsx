@@ -99,7 +99,7 @@ export default function RecipeComponent() {
   };
 
   return (
-    <div className="max-w-6xl  mx-auto p-4">
+    <div className="max-w-6xl sm:scrollbar-thin max-sm:m-3  mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-6">Recipes</h1>
       <div className="flex flex-col items-center mb-6">
         <input
@@ -110,7 +110,7 @@ export default function RecipeComponent() {
           className="w-full max-w-md p-2 border border-gray-300 rounded mb-4"
           aria-label="Search recipes"
         />
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-nowrap gap-2">
           {categories.map(category => (
             <button
               key={category}
