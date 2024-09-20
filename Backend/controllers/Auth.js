@@ -1,12 +1,9 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 const User = require("../models/User"); // Import the User model
 const OTP = require("../models/OTP"); // 
-
-
-const bcrypt = require('bcrypt');
+const otpGenerator = require("otp-generator")
 const jwt = require('jsonwebtoken'); // Import JWT
-const User = require("../models/User");
 
 exports.signup = async (req, res) => {
     try {
@@ -19,6 +16,15 @@ exports.signup = async (req, res) => {
             otp
         } = req.body;
 
+
+        console.log({
+            userName,
+            email,
+            password,
+            confirmPassword,
+            location,
+            otp
+        });
         // Check if all required fields are filled
         if (!userName || !email || !password || !confirmPassword || !location) {
             return res.status(400).json({ message: 'All fields are required' });
@@ -36,11 +42,12 @@ exports.signup = async (req, res) => {
         }
 
         // Image upload (Cloudinary)
-        const image = req.files.Profilepic;
-        let imageUrl = '';
+        const image = req.files?.image;
 
+        let imageUrl;
         if (image) {
             imageUrl = await uploadImageToCloudinary(image, "Recipes");
+            console.log(imageUrl)
             if (!imageUrl) {
                 return res.status(400).json({ message: 'Error uploading image' });
             }
@@ -62,7 +69,7 @@ exports.signup = async (req, res) => {
         const newUser = await User.create({
             userName: userName,
             email: email,
-            ProfilePic: imageUrl.secure_url,
+            profilePic: imageUrl.secure_url,
             password: hashedPassword,
             location: location,
             bio: null,
@@ -81,64 +88,119 @@ exports.signup = async (req, res) => {
     }
 };
 
-
 exports.login = async (req, res) => {
 
-    exports.login = async (req, res) => {
-        try {
-            const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-            // Check if all required fields are filled
-            if (!email || !password) {
-                return res.status(400).json({ message: 'All fields are required' });
-            }
-
-            // Find user with provided email
-            const user = await User.findOne({ email });
-            if (!user) {
-                return res.status(401).json({
-                    success: false,
-                    message: "User is not registered with us. Please sign up to continue.",
-                });
-            }
-
-            // Compare the password with bcrypt
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-            if (!isPasswordValid) {
-                return res.status(401).json({
-                    success: false,
-                    message: "Invalid Password",
-                });
-            }
-
-            // Generate JWT token
-            const token = jwt.sign(
-                { email: user.email, id: user._id, role: user.role },
-                process.env.SECRET_KEY,
-                { expiresIn: '24h' }
-            );
-
-            // Remove the password from the user object before returning
-            user.password = undefined;
-
-            // Set the cookie and return success response
-            const options = {
-                expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
-                httpOnly: true,
-            };
-
-            res.cookie("token", token, options).status(200).json({
-                success: true,
-                message: "User logged in successfully",
-                user,
-                token,
-                role: user.role,
-            });
-
-        } catch (error) {
-            console.error('Error during login:', error.message);
-            return res.status(500).json({ message: 'Internal Server Error' });
+        // Check if all required fields are filled
+        if (!email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
         }
-    };
+
+        // Find user with provided email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "User is not registered with us. Please sign up to continue.",
+            });
+        }
+
+        // Compare the password with bcrypt
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid Password",
+            });
+        }
+
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { email: user.email, id: user._id, role: user.role },
+            process.env.SECRET_KEY,
+            { expiresIn: '24h' }
+        );
+
+        user.token = token
+        // Remove the password from the user object before returning
+        user.password = undefined;
+
+        // Set the cookie and return success response
+        const options = {
+            expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
+            httpOnly: true,
+            accountType: user.accountType,
+        };
+
+        res.cookie("token", token, options).status(200).json({
+            success: true,
+            message: "User logged in successfully",
+            user,
+            token,
+            role: user.accountType,
+        });
+
+    } catch (error) {
+        console.error('Error during login:', error.message);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+
+
+
+exports.sendOtp = async (req, res) => {
+    try {
+        // Fetch email from the body
+        const { email } = req.body;
+
+        // Check if the user already exists
+        const checkUserPresent = await User.findOne({ email });
+
+        if (checkUserPresent) {
+            return res.status(401).json({
+                success: false,
+                message: 'User already exists'
+            });
+        }
+
+        // Generate OTP
+        let otp = otpGenerator.generate(6, {
+            upperCaseAlphabets: false,
+            lowerCaseAlphabets: false,
+            numbers: true,
+            specialCharacters: false
+        });
+
+        // Check if the generated OTP already exists in the database
+        let result = await OTP.findOne({ otp });
+        while (result) {
+            otp = otpGenerator.generate(6, {
+                upperCaseAlphabets: false,
+                lowerCaseAlphabets: false,
+                numbers: true,
+                specialCharacters: false
+            });
+            result = await OTP.findOne({ otp });  // Regenerate if OTP already exists
+        }
+
+        // Save OTP in the database with the email
+        const otpPayload = { email, otp };
+        const otpBody = await OTP.create(otpPayload);
+        console.log("OTP Body:", otpBody);
+        //return res
+        res.status(200).json({
+            success: true,
+            message: `OTP Sent Successfully`,
+            otp,
+        })
+
+    } catch (error) {
+        console.error('Error sending OTP:', error.message);
+        return res.status(500).json({ message: 'Internal Server Error' });
+
+    }
 
 }
