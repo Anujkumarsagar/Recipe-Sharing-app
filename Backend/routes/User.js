@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { auth } = require("../middleware/auth");
 const {
-    createRecipes,
     updateProfile,
     deleteProfile,
     getUserProfile,
@@ -10,8 +9,6 @@ const {
     addToFavorites
 } = require("../controllers/User");
 
-// Create a new recipe
-router.post("/create-recipe", auth, createRecipes);
 
 // Update user profile
 router.put("/update-profile", auth, updateProfile);

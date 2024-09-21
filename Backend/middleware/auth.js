@@ -1,70 +1,64 @@
 const dotenv = require("dotenv")
 const User = require("../models/User")
-
+const jwt = require("jsonwebtoken")
 
 dotenv.config();
 
 exports.auth = async (req, res, next) => {
     try {
+        console.log("Cookies:", req.cookies);
+        console.log("Authorization header:", req.header("Authorization"));
 
-        const token = req.cookies.token || req.header("Authorization").replace("Bearer", "");
+        const token = req.cookies.token || req.header("Authorization")?.replace("Bearer", "").trim();
 
-        //check token
+        console.log("Extracted token:", token);
 
         if (!token) {
             return res.status(401).json({
                 success: false,
-                message: `Token Missing`,
-            })
+                message: "Token Missing",
+            });
         }
 
-        try {
-            const decode = jwt.verify(token, process.env.JWT_SECRET);
-            req.user = decode;
+        const decode = jwt.verify(token, process.env.SECRET_KEY);
+        req.user = decode;
 
-            console.log(decode);
-        } catch (error) {
-            return res.status(401).json({
-                success: false,
-                message: "token is invalid"
-            })
-
-        }
+        console.log(req.user);
 
         next();
 
-
-
     } catch (error) {
-
-        return res.status(401).json({
-            success: false,
-            error: error.messsage,
-        })
-
-    }
-}
-
-
-exports.isCreator = async(erq, res, next) => {
-    try {
-        const user = await User.findById(req.user._id);
-        if (user.accountType != "creator") {
+        if (error instanceof jwt.JsonWebTokenError) {
             return res.status(401).json({
+                success: false,
+                message: "Invalid token",
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: "Authentication Failed",
+
+        });
+    }
+};
+
+
+exports.isCreator = async (req, res, next) => {
+    try {
+        console.log("User account type:", req.user);
+        if (req.user.role !== "creator") {
+            return res.status(403).json({
                 success: false,
                 message: "Only creators can access this route"
-            })
+            });
         }
-
         next();
-
-
     } catch (error) {
-
-        return res.status(401).json({
+        console.error("Error in isCreator middleware:", error);
+        return res.status(500).json({
             success: false,
-            error: error.messsage,
-        })
-
+            message: "Internal server error"
+        });
     }
 }

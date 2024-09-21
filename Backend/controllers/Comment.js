@@ -6,7 +6,11 @@ exports.createComment = async (req, res) => {
     try {
         const { content } = req.body;
         const { recipeId } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
+
+        console.log(userId);
+        console.log(content);
+        console.log(recipeId);
 
         if (!content) {
             return res.status(400).json({
@@ -23,19 +27,25 @@ exports.createComment = async (req, res) => {
             });
         }
 
+        console.log(recipe);
+
         const newComment = new Comment({
-            content,
-            author: userId,
-            recipe: recipeId
+            commentText: content,
+            userId: userId,
+            recipeId: recipeId
         });
+
 
         await newComment.save();
 
         await Recipe.findByIdAndUpdate(recipeId, {
-            $push: { comments: newComment._id }
-        });
+            $push: { comment: newComment._id }
+        },
+        { new: true }
+    );
 
         res.status(201).json({
+
             success: true,
             data: newComment
         });
@@ -53,7 +63,7 @@ exports.getCommentsByRecipe = async (req, res) => {
     try {
         const { recipeId } = req.params;
 
-        const comments = await Comment.find({ recipe: recipeId }).populate('author', 'name');
+        const comments = await Comment.find({ recipeId: recipeId }).populate('userId', 'commentText');
 
         res.status(200).json({
             success: true,
@@ -73,9 +83,9 @@ exports.updateComment = async (req, res) => {
     try {
         const { commentId } = req.params;
         const { content } = req.body;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
-        const comment = await Comment.findById(commentId);
+        const comment = await Comment.findByIdAndUpdate(commentId, { commentText: content }, { new: true });
 
         if (!comment) {
             return res.status(404).json({
@@ -84,14 +94,18 @@ exports.updateComment = async (req, res) => {
             });
         }
 
-        if (comment.author.toString() !== userId.toString()) {
+
+        if (comment.userId.toString() !== userId.toString()) {
             return res.status(403).json({
+
+
                 success: false,
+
                 message: "You are not authorized to update this comment"
             });
         }
 
-        comment.content = content;
+        comment.commentText = content;
         await comment.save();
 
         res.status(200).json({
@@ -111,9 +125,9 @@ exports.updateComment = async (req, res) => {
 exports.deleteComment = async (req, res) => {
     try {
         const { commentId } = req.params;
-        const userId = req.user._id;
+        const userId = req.user.id;
 
-        const comment = await Comment.findById(commentId);
+        const comment = await Comment.findByIdAndDelete(commentId);
 
         if (!comment) {
             return res.status(404).json({
@@ -122,9 +136,12 @@ exports.deleteComment = async (req, res) => {
             });
         }
 
-        if (comment.author.toString() !== userId.toString()) {
+
+
+        if (comment.userId.toString() !== userId.toString()) {
             return res.status(403).json({
                 success: false,
+
                 message: "You are not authorized to delete this comment"
             });
         }

@@ -10,22 +10,21 @@ const categorySchema = new Schema({
   },
   description: {
     type: String,
-    trim: true, // Optional description for the category
+    trim: true,
     default: ''
   },
   slug: {
-    type: String, // A unique slug for SEO-friendly category URLs
+    type: String,
     unique: true,
-    required: true,
     lowercase: true,
     trim: true
   },
   image: {
-    type: String, // URL to an image or icon representing the category
-    default: ''
+    type: Object,
+    default: null
   },
   popularity: {
-    type: Number, // Popularity score for sorting or ranking categories
+    type: Number,
     default: 0
   },
   createdAt: {
@@ -39,7 +38,24 @@ categorySchema.pre('save', function (next) {
   if (!this.slug) {
     this.slug = this.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
   }
+
+  // Handle Cloudinary image object
+  if (this.image && typeof this.image === 'object') {
+    this.image = {
+      public_id: this.image.public_id,
+      url: this.image.secure_url
+    };
+  }
+
   next();
+});
+
+// Added comment: Define virtual field for recipe count
+categorySchema.virtual('recipeCount', {
+  ref: 'Recipe',
+  localField: '_id',
+  foreignField: 'category',
+  count: true
 });
 
 const Category = mongoose.model('Category', categorySchema);

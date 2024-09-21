@@ -24,7 +24,8 @@ const UserSchema = mongoose.Schema({
         default: ""
     },
     profilePic: {
-        type: String,
+        type: Object,
+        default: null
     },
     contactNumber: {
         type: String,
@@ -40,6 +41,12 @@ const UserSchema = mongoose.Schema({
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Recipe'
+        }
+    ],
+    categories: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category'
         }
     ],
     accountType: {
@@ -58,6 +65,17 @@ const UserSchema = mongoose.Schema({
     token: {
         type: String,
     }
-})
+}, { timestamps: true })
+
+// Pre-save hook to handle Cloudinary image object
+UserSchema.pre('save', function (next) {
+    if (this.profilePic && typeof this.profilePic === 'object') {
+        this.profilePic = {
+            public_id: this.profilePic.public_id,
+            url: this.profilePic.secure_url
+        };
+    }
+    next();
+});
 
 module.exports = mongoose.model('User', UserSchema)

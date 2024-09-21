@@ -7,74 +7,53 @@ const jwt = require('jsonwebtoken'); // Import JWT
 
 exports.signup = async (req, res) => {
     try {
-        const {
-            userName,
-            email,
-            password,
-            confirmPassword,
-            location,
-            otp
-        } = req.body;
+        const { userName, email, password, confirmPassword, location, otp, accountType } = req.body;
+        const image = req.files?.image;
 
-
-        console.log({
-            userName,
-            email,
-            password,
-            confirmPassword,
-            location,
-            otp
-        });
-        // Check if all required fields are filled
+        // Validate input
         if (!userName || !email || !password || !confirmPassword || !location) {
             return res.status(400).json({ message: 'All fields are required' });
         }
-
-        // Check if passwords match
         if (password !== confirmPassword) {
             return res.status(400).json({ message: 'Passwords do not match' });
         }
 
-        // Check if the email already exists
+        // Check existing user
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'Email already exists' });
         }
 
-        // Image upload (Cloudinary)
-        const image = req.files?.image;
-
-        let imageUrl;
-        if (image) {
-            imageUrl = await uploadImageToCloudinary(image, "Recipes");
-            console.log(imageUrl)
-            if (!imageUrl) {
-                return res.status(400).json({ message: 'Error uploading image' });
-            }
-        }
-
-        // Check OTP validation
-        const otpResponse = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1);
-        if (otpResponse.length === 0 || otp !== otpResponse[0].otp) {
+        // Validate OTP
+        const recentOTP = await OTP.findOne({ email }).sort({ createdAt: -1 });
+        if (!recentOTP || otp !== recentOTP.otp) {
             return res.status(400).json({
                 success: false,
                 message: "The OTP is not valid",
             });
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Process image
+        let imageUrl;
+        if (image) {
+            imageUrl = await uploadImageToCloudinary(image, "Recipes");
+            if (!imageUrl) {
+                return res.status(400).json({ message: 'Error uploading image' });
+            }
+        }
 
-        // Create the user
+        // Create user
         const newUser = await User.create({
-            userName: userName,
-            email: email,
-            profilePic: imageUrl.secure_url,
-            password: hashedPassword,
-            location: location,
+            userName,
+            email,
+            profilePic: imageUrl?.secure_url,
+            password: await bcrypt.hash(password, 10),
+            location,
             bio: null,
             contactNumber: null,
+            accountType: accountType
         });
+
 
         return res.status(201).json({
             success: true,
@@ -115,11 +94,11 @@ exports.login = async (req, res) => {
                 message: "Invalid Password",
             });
         }
-
+        console.log("User account type:", user);
 
         // Generate JWT token
         const token = jwt.sign(
-            { email: user.email, id: user._id, role: user.role },
+            { email: user.email, id: user._id, role: user.accountType },
             process.env.SECRET_KEY,
             { expiresIn: '24h' }
         );
