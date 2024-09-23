@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, Moon, Sun, Globe, Lock, Eye, EyeOff } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { getProfile } from '../store/userSlice';
+import api from '../api';
 
-export default function Settings({ userLoggedIn }) {
+export default function Settings() {
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { profile } = useSelector((state) => state.user);
   const [settings, setSettings] = useState({
     notifications: {
       email: true,
@@ -20,6 +26,28 @@ export default function Settings({ userLoggedIn }) {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await api.get('/settings');
+        setSettings(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch settings. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      dispatch(getProfile());
+      fetchSettings();
+    } else {
+      setLoading(false);
+    }
+  }, [isAuthenticated, dispatch]);
 
   const handleNotificationChange = (type) => {
     setSettings((prev) => ({
@@ -54,15 +82,24 @@ export default function Settings({ userLoggedIn }) {
     setSettings((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically send the updated settings to your backend
-    console.log('Saving settings:', settings);
+    try {
+      const response = await api.put('/settings', settings);
+      dispatch(getProfile());
+      // Show success message to user
+    } catch (error) {
+      // Show error message to user
+      console.error('Failed to update settings:', error);
+    }
   };
+
+  if (loading) return <div className="text-center py-8">Loading...</div>;
+  if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
     <>
-      {userLoggedIn ? (
+      {isAuthenticated ? (
         <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
           <form onSubmit={handleSubmit} className="p-4 sm:p-6 md:p-8">
             <h2 className="text-2xl font-bold mb-6">Settings</h2>
@@ -173,9 +210,9 @@ export default function Settings({ userLoggedIn }) {
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                       {showPassword ? (
-                        <EyeOff className="h-5 w-5 text-gray-400" onClick={() => setShowPassword(false)} />
+                        <EyeOff className="h-5 w-5 text-gray-400 cursor-pointer" onClick={() => setShowPassword(false)} />
                       ) : (
-                        <Eye className="h-5 w-5 text-gray-400" onClick={() => setShowPassword(true)} />
+                        <Eye className="h-5 w-5 text-gray-400 cursor-pointer" onClick={() => setShowPassword(true)} />
                       )}
                     </div>
                   </div>
@@ -194,9 +231,9 @@ export default function Settings({ userLoggedIn }) {
                     />
                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                       {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5 text-gray-400" onClick={() => setShowConfirmPassword(false)} />
+                        <EyeOff className="h-5 w-5 text-gray-400 cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
                       ) : (
-                        <Eye className="h-5 w-5 text-gray-400" onClick={() => setShowConfirmPassword(true)} />
+                        <Eye className="h-5 w-5 text-gray-400 cursor-pointer" onClick={() => setShowConfirmPassword(true)} />
                       )}
                     </div>
                   </div>

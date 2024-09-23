@@ -1,28 +1,34 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 export default function UserTestimonials() {
+  const theme = useSelector((state) => state.user.theme); // Get theme from Redux store
+
   return (
-    <section className="py-12 shadow-sm  px-4 md:px-6 bg-gray-50">
+    <section className={`py-12 shadow-sm px-4 md:px-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-8">What Our Users Say</h2>
+        <h2 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>What Our Users Say</h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <TestimonialCard
             name="Priya Sharma"
             avatar="/placeholder.svg?height=40&width=40"
             comment="I love the variety of recipes! The step-by-step instructions make cooking so easy."
             rating={5}
+            theme={theme}
           />
           <TestimonialCard
             name="Rahul Patel"
             avatar="/placeholder.svg?height=40&width=40"
             comment="This website has transformed my cooking skills. The community is so supportive!"
             rating={4}
+            theme={theme}
           />
           <TestimonialCard
             name="Anita Desai"
             avatar="/placeholder.svg?height=40&width=40"
             comment="The recipes are authentic and delicious. I've impressed my family with my new dishes!"
             rating={5}
+            theme={theme}
           />
         </div>
       </div>
@@ -30,13 +36,13 @@ export default function UserTestimonials() {
   );
 }
 
-function TestimonialCard({ name, avatar, comment, rating }) {
+function TestimonialCard({ name, avatar, comment, rating, theme }) {
   return (
-    <div className="bg-white border-slate-30  0 border-2 p-6 rounded-lg shadow-lg transition-all hover:cursor-auto hover:shadow-2xl">
-      <div className="flex items-center space-x-4 mb-4 ">
+    <div className={`p-6 rounded-lg shadow-lg transition-all hover:cursor-auto hover:shadow-2xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-slate-300'} border-2`}>
+      <div className="flex items-center space-x-4 mb-4">
         <img src={avatar} alt={name} className="w-10 h-20 rounded-full" />
         <div>
-          <h3 className="font-semibold">{name}</h3>
+          <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{name}</h3>
           <div className="flex">
             {[...Array(5)].map((_, i) => (
               <svg
@@ -51,7 +57,7 @@ function TestimonialCard({ name, avatar, comment, rating }) {
           </div>
         </div>
       </div>
-      <p className="text-gray-600">{comment}</p>
+      <p className={`text-gray-600 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{comment}</p>
     </div>
   );
 }

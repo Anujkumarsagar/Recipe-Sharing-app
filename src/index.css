@@ -1,7 +1,131 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --amazing: 340 82% 52%; /* Added more amazing property */
+  }
 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --amazing: 340 82% 52%; /* Added more amazing property */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-0;
+  }
+  body {
+    @apply bg-[var(--background)] text-[var(--foreground)];
+  }
+}
+
+@layer components {
+  .cards {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl;
+  }
+
+  .backgroundImage {
+    @apply bg-gradient-to-r from-purple-500 to-pink-500 dark:from-purple-900 dark:to-pink-900;
+  }
+
+  .background-video {
+    @apply fixed inset-0 w-full h-full object-cover z-[-1] opacity-30 dark:opacity-20;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar styles */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.gray.400') theme('colors.gray.100');
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: theme('colors.gray.600') theme('colors.gray.800');
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500 dark:bg-gray-500;
+  }
+}
+
+/* Additional custom styles */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400;
+  }
+
+  .bg-blur {
+    @apply backdrop-blur-md bg-white/30 dark:bg-gray-900/30;
+  }
+
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:focus:ring-offset-gray-900;
+  }
+}
 /* Hide scrollbars */
 .scrollbar-thin::-webkit-scrollbar {
   display: none;
@@ -30,12 +154,6 @@
   width: 100%;
 }
 
-
-img {
-  content: url('https://placehold.co/600x400');
-}
-
-
 .background-video {
   position: absolute;
   top: 50%;
@@ -54,7 +172,7 @@ img {
   /* Place the video behind the overlay content */
 }
 
-/* A/* Basic styles for the text container */
+/* Basic styles for the text container */
 .animated-text {
   display: flex; /* Flexbox to arrange spans in a row */
   font-size: 2rem; /* Adjust font size as needed */
@@ -66,7 +184,7 @@ img {
 .animated-text {
   background: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet);
   -webkit-background-clip: text; /* Clip gradient to text */
-  -webkit-text-fill-color: black; /* Make text color transparent to show gradient */
+  -webkit-text-fill-color: transparent; /* Make text color transparent to show gradient */
   background-clip: text; /* For non-WebKit browsers */
   display: inline-block; /* Ensure gradient applies to text */
 }
@@ -103,9 +221,95 @@ img {
     transform: translateY(-10px); /* Move back towards normal */
   }
   100% {
-    opacity: 1; /* Start invisible again */
+    opacity: 1; /* Fully visible */
     transform: translateY(0px); /* Move back down */
   }
 }
 
-  
+/* index.css or global.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Theme Toggles */
+html.light {
+  --bg-color: #f7fafc;
+  --text-color: #2d3748;
+  --bg-secondary: #edf2f7;
+  --text-secondary: #4a5568;
+}
+
+html.dark {
+  --bg-color: #1a202c;
+  --text-color: #f7fafc;
+  --bg-secondary: #2d3748;
+  --text-secondary: #a0aec0;
+}
+
+body {
+  @apply transition-colors duration-300;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+/* Navbar Styles */
+.navbar {
+  @apply sticky top-0 z-20 bg-opacity-70 backdrop-blur-md shadow-md;
+  background-color: var(--bg-secondary);
+}
+
+.navbar a {
+  @apply text-lg font-medium transition-colors duration-300;
+  color: var(--text-color);
+}
+
+.navbar a:hover {
+  @apply text-blue-500;
+}
+
+/* Button Styles */
+.theme-toggle-btn {
+  @apply fixed bottom-4 right-4 p-2 rounded-full transition-colors duration-300;
+  background-color: var(--bg-secondary);
+  color: var(--text-color);
+}
+
+.theme-toggle-btn:hover {
+  @apply bg-opacity-90;
+}
+
+/* Main Content Styles */
+.container {
+  @apply mx-auto px-4 py-8;
+}
+
+.page-card {
+  @apply shadow-lg rounded-lg overflow-hidden transition-colors duration-300;
+  background-color: var(--bg-secondary);
+}
+
+.page-card p, .page-card h1, .page-card h2, .page-card h3 {
+  color: var(--text-secondary);
+}
+
+/* Profile Dashboard */
+.profile-dashboard {
+  @apply p-6 shadow-lg rounded-lg transition-colors duration-300;
+  background-color: var(--bg-secondary);
+}
+
+.profile-dashboard h1 {
+  @apply text-2xl font-bold;
+  color: var(--text-color);
+}
+
+/* Footer Styles */
+footer {
+  @apply py-4 text-center transition-colors duration-300;
+  background-color: var(--bg-secondary);
+}
+
+footer p {
+  @apply text-sm font-medium;
+  color: var(--text-secondary);
+}

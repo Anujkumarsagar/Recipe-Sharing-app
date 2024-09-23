@@ -1,105 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import PopCardForRecipe from '../Components/PopCardForRecipe';
-
-// Mock data for recipes
-const recipesData = [
-  {
-    id: 1,
-    name: "Spaghetti Carbonara",
-    category: "Pasta",
-    image: "/placeholder.svg?height=200&width=300",
-    description: "Classic Italian pasta dish with eggs, cheese, and pancetta",
-    ingredients: ["400g spaghetti", "200g pancetta", "4 large eggs", "100g Pecorino cheese", "100g Parmesan", "Freshly ground black pepper"],
-    instructions: [
-      "Cook spaghetti in a large pot of boiling salted water.",
-      "Fry pancetta with a little olive oil until crispy.",
-      "Whisk eggs and cheese in a bowl.",
-      "Drain pasta, reserving some cooking water.",
-      "Mix pasta with pancetta, then add egg mixture off the heat.",
-      "Add cooking water if needed to create a creamy sauce.",
-      "Season with black pepper and serve immediately."
-    ]
-  },
-  {
-    id: 2,
-    name: "Chicken Tikka Masala",
-    category: "Curry",
-    image: "/placeholder.svg?height=200&width=300",
-    description: "Creamy and spicy Indian curry with tender chicken pieces",
-    ingredients: ["800g chicken breast", "1 cup yogurt", "2 tbsp lemon juice", "2 tsp ground cumin", "2 tsp red chili powder", "2 tsp garam masala", "2 cups tomato puree", "1 cup heavy cream"],
-    instructions: [
-      "Marinate chicken in yogurt, lemon juice, and spices for 2 hours.",
-      "Grill or bake the marinated chicken until cooked through.",
-      "In a large pan, simmer tomato puree with remaining spices.",
-      "Add grilled chicken and cream, simmer for 10 minutes.",
-      "Garnish with fresh coriander and serve with naan bread."
-    ]
-  },
-  {
-    id: 3,
-    name: "Vegetable Stir Fry",
-    category: "Vegetarian",
-    image: "/placeholder.svg?height=200&width=300",
-    description: "Quick and healthy mix of fresh vegetables in a savory sauce",
-    ingredients: ["2 cups mixed vegetables", "2 tbsp oil", "2 cloves garlic", "1 tbsp soy sauce", "1 tbsp oyster sauce", "1 tsp sesame oil"],
-    instructions: [
-      "Heat oil in a wok or large frying pan.",
-      "Add minced garlic and stir-fry for 30 seconds.",
-      "Add vegetables and stir-fry for 3-4 minutes.",
-      "Add soy sauce and oyster sauce, cook for another 2 minutes.",
-      "Drizzle with sesame oil before serving."
-    ]
-  },
-  {
-    id: 4,
-    name: "Berry Smoothie Bowl",
-    category: "Breakfast",
-    image: "/placeholder.svg?height=200&width=300",
-    description: "Refreshing blend of mixed berries topped with granola and fruits",
-    ingredients: ["2 cups mixed frozen berries", "1 banana", "1/2 cup Greek yogurt", "1/4 cup almond milk", "1 tbsp honey", "Toppings: granola, fresh berries, chia seeds"],
-    instructions: [
-      "Blend frozen berries, banana, yogurt, almond milk, and honey until smooth.",
-      "Pour into a bowl.",
-      "Top with granola, fresh berries, and chia seeds.",
-      "Serve immediately."
-    ]
-  }
-];
+import { getAllRecipes, searchRecipes, getRecipesByCategory, getRecipeById } from '../store/recipeSlice.js';
+import { getAllCategories } from '../store/categorySlice.js';
 
 export default function RecipeComponent() {
-  const [recipes, setRecipes] = useState(recipesData);
+  const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
-  const categories = ['All', ...new Set(recipesData.map(recipe => recipe.category))];
+  const { recipes, error } = useSelector((state) => state.recipe);
+  console.log("recipes",recipes)
+  const { categories } = useSelector((state) => state.category);
 
   useEffect(() => {
-    const filteredRecipes = recipesData.filter(recipe => 
-      recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedCategory === 'All' || recipe.category === selectedCategory)
-    );
-    setRecipes(filteredRecipes);
-  }, [searchTerm, selectedCategory]);
+    dispatch(getAllRecipes());
+    dispatch(getAllCategories());
+  }, [dispatch]);
 
-  const handleSearch = (event) => {
+  useEffect(() => {
+    if (selectedCategory !== 'All') {
+      dispatch(getRecipesByCategory(selectedCategory));
+    } else {
+      dispatch(getAllRecipes());
+    }
+  }, [dispatch, selectedCategory]);
+
+  const handleSearch = useCallback((event) => {
     setSearchTerm(event.target.value);
-  };
+    setCurrentPage(1);
+  }, []);
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = useCallback((category) => {
     setSelectedCategory(category);
-  };
+    setSearchTerm('');
+    setCurrentPage(1);
+  }, []);
 
-  const handleRecipeClick = (recipe) => {
-    setSelectedRecipe(recipe);
-  };
+  const handleRecipeClick = useCallback((recipeId) => {
+    dispatch(getRecipeById(recipeId)).then((action) => {
+      if (action.payload) {
+        setSelectedRecipe(action.payload); //payload.data
+        // console.log("Acion payload",action.payload)
+      }
+    });
+  }, [dispatch]);
 
-  const handleCloseRecipe = () => {
+  const handleCloseRecipe = useCallback(() => {
     setSelectedRecipe(null);
-  };
+  }, []);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const filteredRecipes = recipes.filter(recipe => 
+    recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const currentRecipes = filteredRecipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  console.log(currentRecipes);
+
+  const totalPages = Math.ceil(filteredRecipes.length / itemsPerPage);
+
+  if (error) return <div>Error: {error.message || error}</div>;
 
   return (
-    <div className="max-w-6xl sm:scrollbar-thin max-sm:m-3  mx-auto p-4">
+    <div className="max-w-6xl sm:scrollbar-thin max-sm:m-3 mx-auto p-4">
       <h1 className="text-3xl font-bold text-center mb-6">Recipes</h1>
       <div className="flex flex-col items-center mb-6">
         <input
@@ -110,36 +78,70 @@ export default function RecipeComponent() {
           className="w-full max-w-md p-2 border border-gray-300 rounded mb-4"
           aria-label="Search recipes"
         />
-        <div className="flex flex-nowrap gap-2">
-          {categories.map(category => (
-            <button
-              key={category}
-              onClick={() => handleCategoryChange(category)}
-              className={`px-4 py-2 border border-gray-300 rounded ${selectedCategory === category ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
-              aria-pressed={selectedCategory === category}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => handleCategoryChange('All')}
+            className={`px-4 py-2 border border-gray-300 rounded ${selectedCategory === 'All' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+            aria-pressed={selectedCategory === 'All'}
+          >
+            All
+          </button>
+          {Array.isArray(categories) && categories.length > 0 ? (
+            categories.map(category => (
+              <button
+                key={category._id}
+                onClick={() => handleCategoryChange(category._id)}
+                className={`px-4 py-2 border border-gray-300 rounded ${selectedCategory === category._id ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                aria-pressed={selectedCategory === category._id}
+              >
+                {category.name}
+              </button>
+            ))
+          ) : (
+            <div>No categories available</div>
+          )}
+        </div>
+      </div>
+      {currentRecipes.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {currentRecipes.map(recipe => (
+            <div
+              key={recipe._id}
+              className="border border-gray-300 rounded-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105"
+              onClick={() => handleRecipeClick(recipe._id)}
             >
-              {category}
+              <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
+              <div className="p-4">
+                <h3 className="text-xl font-semibold mb-2">
+                  {recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ? (
+                    <span className="text-blue-600">{recipe.title}</span>
+                  ) : (
+                    recipe.title
+                  )}
+                </h3>
+                <p className="text-gray-600">{recipe.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center text-gray-600">No recipes found</div>
+      )}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          {Array.from({ length: totalPages }, (_, index) => (
+            <button
+              key={index}
+              onClick={() => paginate(index + 1)}
+              className={`mx-1 px-3 py-1 border rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+            >
+              {index + 1}
             </button>
           ))}
         </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 scrollbar-thin gap-6">
-        {recipes.map(recipe => (
-          <div
-            key={recipe.id}
-            className="border border-gray-300  rounded-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105"
-            onClick={() => handleRecipeClick(recipe)}
-          >
-            <img src={recipe.image} alt={recipe.name} className="w-full h-48 object-cover" />
-            <div className="p-4">
-              <h3 className="text-xl font-semibold mb-2">{recipe.name}</h3>
-              <p className="text-gray-600">{recipe.description}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+      )}
       {selectedRecipe && 
-        <PopCardForRecipe selectedRecipe={selectedRecipe} handleCloseRecipe={handleCloseRecipe}/>
+        <PopCardForRecipe selectedRecipe={selectedRecipe.data} handleCloseRecipe={handleCloseRecipe} />
       }
     </div>
   );

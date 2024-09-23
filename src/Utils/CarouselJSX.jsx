@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 // Sample recipe data
 const recipes = [
@@ -31,6 +32,7 @@ const recipes = [
 export default function CarouselJSX() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleItems, setVisibleItems] = useState(1);
+  const theme = useSelector((state) => state.user.theme); // Corrected theme selector
 
   useEffect(() => {
     const handleResize = () => {
@@ -61,7 +63,7 @@ export default function CarouselJSX() {
   };
 
   return (
-    <div className="relative w-full max-w-[80%] mx-auto overflow-hidden">
+    <div className={`relative w-full max-w-[80%] mx-auto overflow-hidden ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <div className="relative overflow-hidden">
         <div 
           className="flex transition-transform duration-300"
@@ -73,7 +75,7 @@ export default function CarouselJSX() {
               className="flex-shrink-0 p-2 md:p-4"
               style={{ flex: `0 0 ${100 / visibleItems}%` }}
             >
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className={`rounded-lg shadow-md overflow-hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
                 <img 
                   src={recipe.image} 
                   alt={recipe.title} 

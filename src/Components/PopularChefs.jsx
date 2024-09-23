@@ -1,35 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 export default function PopularChefs() {
-  const chefs = [
-    {
-      name: "Sanjeev Kapoor",
-      image: "/placeholder.svg?height=200&width=200",
-      bio: "Master chef known for innovative Indian cuisine",
-      topRecipes: ["Butter Chicken", "Shahi Paneer", "Tandoori Roti"]
-    },
-    {
-      name: "Tarla Dalal",
-      image: "/placeholder.svg?height=200&width=200",
-      bio: "Renowned for vegetarian and healthy recipes",
-      topRecipes: ["Dhokla", "Pav Bhaji", "Vegetable Biryani"]
-    },
-    {
-      name: "Vikas Khanna",
-      image: "/placeholder.svg?height=200&width=200",
-      bio: "Michelin-starred chef specializing in modern Indian cuisine",
-      topRecipes: ["Amritsari Fish", "Mango Lassi", "Spiced Lamb Shanks"]
-    }
-  ];
+  const theme = useSelector((state) => state.user.theme); // Fixed theme selector
+  const [chefs, setChefs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchChefs = async () => {
+      try {
+        const response = await axios.get('api/user/all-users');
+        setChefs(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch chefs. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    fetchChefs();
+  }, []);
+
+  if (loading) return <div className="text-center py-8">Loading...</div>;
+  if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
-    <section className="py-12 px-4 md:px-6 bg-gray-50">
+    <section className={`py-12 px-4 md:px-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8">Meet Our Chefs</h2>
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {chefs && chefs.length > 0 ? (
-            chefs.map((chef, index) => (
-              <ChefCard key={index} {...chef} />
+            chefs.map((chef) => (
+              <ChefCard key={chef._id} {...chef} />
             ))
           ) : (
             <p className="col-span-full text-center text-gray-500">No chefs available at the moment.</p>
@@ -42,7 +46,7 @@ export default function PopularChefs() {
 
 function ChefCard({ name, image, bio, topRecipes }) {
   return (
-    <div className="bg-white border-2 border-slate-300 hover:scale-105 transition-all scroll-smooth rounded-lg shadow-md hover:shadow-lg  overflow-hidden">
+    <div className="bg-white border-2 border-slate-300 hover:scale-105 transition-all scroll-smooth rounded-lg shadow-md hover:shadow-lg overflow-hidden">
       <img src={image} alt={name} className="w-full h-48 object-cover" />
       <div className="p-6">
         <h3 className="font-bold text-xl mb-2">{name}</h3>
