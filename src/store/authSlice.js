@@ -8,13 +8,67 @@ export const signUp = createAsyncThunk(
       const response = await api.post('/auth/signup', userData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      if (response.data && response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      console.log(response.data);
+      if(response.data.success){
+        //respone to user that signup is successfull ab tum login kar  lo
         return response.data;
-      } else {
-        return rejectWithValue('Signup failed: Invalid response from server');
+       
       }
+      /* 
+message
+: 
+"User created successfully"
+success
+: 
+true
+user
+: 
+accountType
+: 
+"creator"
+bio
+: 
+null
+categories
+: 
+[]
+contactNumber
+: 
+null
+createdAt
+: 
+"2024-09-24T09:00:37.090Z"
+email
+: 
+"samajseva62@gmail.com"
+favoriteRecipes
+: 
+[]
+location
+: 
+"Meerut, IN Uttar Pradesh"
+password
+: 
+"$2a$10$nqgLrTipa3d9ITLlwg8Wa.UJVCF8roPwOG40zXPF/4DufrGLrfAly"
+profilePic
+: 
+null
+recipes
+: 
+[]
+updatedAt
+: 
+"2024-09-24T09:00:37.090Z"
+userName
+: 
+"Anuj121"
+__v
+: 
+0
+_id
+: 
+"66f27fb5d27a6a1ac83ca6fd"*/
+
     } catch (error) {
       return rejectWithValue(error.response?.data || 'An error occurred during signup');
     }

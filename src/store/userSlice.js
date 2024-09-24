@@ -19,7 +19,7 @@ export const fetchUserProfile = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const response = await api.get("/user/profile");
-      return response.data;
+      return response.data.Object;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'An error occurred');
     }
@@ -117,12 +117,18 @@ export const getProfile = createAsyncThunk(
 );
 
 export const updateProfile = createAsyncThunk(
-  'user/updateProfile',
+  'user/update-profile',
   async (profileData, { rejectWithValue }) => {
     try {
-      console.log("profileData in updateProfile",profileData);
-      const response = await api.put('/user/update-profile', profileData);
-      console.log("response in updateProfile",response);
+      console.log("profileData in updateProfile", profileData);
+      const formData = new FormData();
+      Object.entries(profileData).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      console.log("formData in updateProfile", formData);
+      const response = await api.put('/user/update-profile', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Failed to update profile');

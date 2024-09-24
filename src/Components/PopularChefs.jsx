@@ -27,7 +27,7 @@ export default function PopularChefs() {
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
-    <section className={`py-12 px-4 md:px-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <section className={`py-12 px-4 md:px-6 `}>
       <div className="max-w-6xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8">Meet Our Chefs</h2>
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

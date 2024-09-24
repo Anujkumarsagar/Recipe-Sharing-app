@@ -8,19 +8,19 @@ import Footer from "./Footer";
 import { useSelector } from "react-redux";
 
 export default function Hero() {
-    const theme = useSelector((state) => state.user.theme); // Updated to use theme from user slice
+    const theme = useSelector((state) => state.user.theme);
     return (
-        <div className={`flex flex-col w-full lg:w-[99%]  mx-auto ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} transition-colors duration-300`}>
+        <div className={`flex flex-col w-full mx-auto ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} transition-colors duration-300 relative`}>
             {/* Video Background Section */}
-            <div className="relative overflow-hidden">
-                <video autoPlay muted loop className="absolute top-0 left-0 w-full h-full object-cover z-[-1]">
+            <div className="absolute overflow-hidden">
+                <div className="absolute inset-0 bg-black opacity-50"></div>
+                <video autoPlay muted loop className="object-cover w-[100vw] h-[100vh] z-[-1]">
                     <source src="https://videos.pexels.com/video-files/2081576/2081576-hd_1920_1080_30fps.mp4" type="video/mp4" />
-                    Your browser does not support the video tag.
                 </video>
             </div>
 
             {/* Hero Section */}
-            <section className={`relative h-full lg:py-12 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
+            <section className="h-full lg:py-12">
                 <div className="container mx-auto relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 px-4 md:px-6 h-full">
                     {/* Hero Text Section */}
                     <div className="flex flex-col justify-center space-y-6 text-center md:text-left h-full">
@@ -60,6 +60,9 @@ export default function Hero() {
 
             {/* Recipes Grid Section */}
             <section className={`w-full py-12 md:py-16 lg:py-20 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+                <div className={`background absolute w-full h-full ${theme === 'dark' ? 'dark-mode' : 'light-mode'} `}>
+                    <div className="absolute w-full h-[70%] bg-[linear-gradient(#000000_1%,_#00000024_20%,_#ff000000_50%,_#ffff0000_80%,_black_90%)]"></div>
+                </div>
                 <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 px-4 md:px-6">
                     {recipeData.map((recipe) => (
                         <RecipeCard key={recipe.id} recipe={recipe} theme={theme} />
@@ -68,15 +71,15 @@ export default function Hero() {
             </section>
 
             {/* Testimonials and Other Sections */}
-            <section className={`py-12 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+            <section className={`py-12 z-10 transition-colors duration-300`}>
                 <CarouselJSX />
             </section>
 
-            <section className={`py-12 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+            <section className={`py-12 transition-colors duration-300 z-10`}>
                 <UserTestimonials />
             </section>
 
-            <section className={`py-12 transition-colors duration-300 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+            <section className={`py-12 transition-colors duration-300 z-10`}>
                 <PopularChefs />
             </section>
 
@@ -84,7 +87,6 @@ export default function Hero() {
         </div>
     );
 }
-
 
 function SearchInput({ theme }) {
     return (

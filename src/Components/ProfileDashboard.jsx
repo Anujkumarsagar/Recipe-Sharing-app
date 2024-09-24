@@ -10,10 +10,7 @@ import CreateRecipe from './CreatRecipe.jsx'; // Fixed typo from 'CreatRecipe.js
 
 export default function ProfileDashboard() {
   const dispatch = useDispatch();
-  const { isAuthenticated, recipes, currentUser, theme } = useSelector((state) => state.user); // Use user slice for currentUser and theme
-  console.log("currentUser", currentUser);
-  console.log("recipes", recipes);
-  console.log("isAuthenticated", isAuthenticated);
+  const { isAuthenticated, recipes, currentUser, theme } = useSelector((state) => state.user);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [showCreateRecipe, setShowCreateRecipe] = useState(false);
   const location = useLocation();
@@ -21,7 +18,7 @@ export default function ProfileDashboard() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(getUserRecipes()); // Removed non-existent functions getProfile, getCategories, and getComments
+      dispatch(getUserRecipes());
     }
   }, [dispatch, isAuthenticated]);
 
@@ -43,9 +40,9 @@ export default function ProfileDashboard() {
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 md: py-8 flex flex-col lg:flex-row">
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row">
         {/* Sidebar */}
-        <aside className={`lg:flex max-sm:hidden w-full lg:w-64 lg:mr-8 `}>
+        <aside className={`lg:flex max-sm:hidden w-full lg:w-64 lg:mr-8`}>
           <nav className="space-y-2">
             <Link
               to="myrecipes"
@@ -77,7 +74,6 @@ export default function ProfileDashboard() {
         {/* Main Content with Nested Routes */}
         <main className="flex-1">
           <Routes>
-            {/* Default route */}
             <Route path="myrecipes" element={
               <MyRecipes
                 recipes={recipes}
@@ -105,9 +101,7 @@ export default function ProfileDashboard() {
       {/* Create Recipe Modal */}
       {showCreateRecipe && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg w-full max-w-md">
-            <CreateRecipe onClose={handleCloseCreateRecipe} />
-          </div>
+         <CreateRecipe  onClose={handleCloseCreateRecipe} /> 
         </div>
       )}
     </div>

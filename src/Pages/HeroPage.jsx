@@ -1,10 +1,11 @@
 import React from 'react'
 import Hero from '../Components/Hero'
+import '../App.css';
 
 function HeroPage() {
   return (
-    <div>
-        <Hero />
+    <div className='background-cover relative'>
+      <Hero />
     </div>
   )
 }

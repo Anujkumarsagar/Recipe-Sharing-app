@@ -51,13 +51,11 @@ export default function EnhancedLoginToggle({ onClose }) {
 
     try {
       const resultAction = await dispatch(signUp(formData));
-      if (signUp.fulfilled.match(resultAction)) {
-        setResponse('Signup successful!');
+      console.log("resultAction",resultAction);
         onClose();
-        navigate('/profile/profile');
-      } else if (signUp.rejected.match(resultAction)) {
-        setResponse(resultAction.payload?.message || 'Signup failed. Please try again.');
-      }
+        setResponse(signUp.fulfilled.payload?.message || 'Signup successful. Please login.'); 
+        console.log("resultAction.payload",signUp.fulfilled.payload);
+        
     } catch (error) {
       setResponse('An error occurred during signup.');
     }
@@ -70,6 +68,7 @@ export default function EnhancedLoginToggle({ onClose }) {
       if (login.fulfilled.match(resultAction)) {
         onClose();
         navigate('/profile/profile');
+        window.location.reload();
       } else if (login.rejected.match(resultAction)) {
         setResponse(resultAction.payload?.message || 'Login failed. Please try again.');
       }

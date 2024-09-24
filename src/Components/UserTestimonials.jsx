@@ -5,9 +5,9 @@ export default function UserTestimonials() {
   const theme = useSelector((state) => state.user.theme); // Get theme from Redux store
 
   return (
-    <section className={`py-12 shadow-sm px-4 md:px-6 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <section className={`py-12 shadow-sm px-4 md:px-6 z-10`}>
       <div className="max-w-6xl mx-auto">
-        <h2 className={`text-3xl font-bold text-center mb-8 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>What Our Users Say</h2>
+        <h2 className={`text-3xl font-bold text-center mb-8`}>What Our Users Say</h2>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <TestimonialCard
             name="Priya Sharma"

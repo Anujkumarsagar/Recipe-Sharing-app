@@ -15,22 +15,26 @@ const Navbar = () => {
 
   const handleProfileClick = () => {
     if (isAuthenticated) {
+      
       navigate("/profile/profile");
     } else {
       setIsLoginOpen(true);
     }
   };
 
+  
+
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
+    window.location.reload();
   };
 
   useEffect(() => {
     if (isAuthenticated && !profile) {
       dispatch(getProfile());
     }
-  }, [isAuthenticated, profile, dispatch]);
+  }, [isAuthenticated, profile]);
 
   useEffect(() => {
     if (isLoginOpen || isNavOpen) {
@@ -131,6 +135,12 @@ const Navbar = () => {
               <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
                 <img className="aspect-square h-full w-full" alt="User" src={profile?.profilePic || "https://gravatar.com/avatar/1d1106d0b15053200c50c641d2d5bbd7?s=400&d=robohash&r=x"} />
               </span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="hidden md:inline-flex items-center gap-2 rounded-lg bg-red-500 text-white font-medium px-4 py-2 hover:bg-red-600 transition-colors"
+            >
+              Logout
             </button>
           </div>
         ) : (

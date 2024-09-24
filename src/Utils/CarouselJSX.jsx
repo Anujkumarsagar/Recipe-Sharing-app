@@ -63,7 +63,7 @@ export default function CarouselJSX() {
   };
 
   return (
-    <div className={`relative w-full max-w-[80%] mx-auto overflow-hidden ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+    <div className={`relative w-full rounded-md max-w-[80%] mx-auto overflow-hidden backdrop-blur-sm  ${theme ==="dark"? "dark:bg-gray-900/30" : "bg-white/30" }`}>
       <div className="relative overflow-hidden">
         <div 
           className="flex transition-transform duration-300"
