@@ -2,7 +2,7 @@ import axios from 'axios';
 import { logout, setTheme } from './store/userSlice';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: 'https://backendrecipesharing.onrender.com/api',
   withCredentials: true,
 });
 
