@@ -8,7 +8,7 @@ export default function MyRecipes() {
   const { currentUser, isAuthenticated, loading, recipes, recipesLoading, error, theme } = useSelector((state) => state.user);
 
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  console.log("selectedRecipe",selectedRecipe)
+  console.log("selectedRecipe", selectedRecipe)
   const [userRecipes, setUserRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,11 +18,11 @@ export default function MyRecipes() {
 
       console.log("isAuthenticated", isAuthenticated);
       dispatch(getUserRecipes()).then((response) => {
-        console.log("response in my recipes",response)
+        console.log("response in my recipes", response.payload.user.recipes)
         if (response.error) {
           console.error("Error fetching profile:", response.error);
         } else {
-          setUserRecipes(response.payload); // Use recipes from profile
+          setUserRecipes(response.payload.user.recipes); // Use recipes from profile
         }
         setIsLoading(false);
       });
@@ -30,7 +30,7 @@ export default function MyRecipes() {
   }, [isAuthenticated, dispatch]);
 
   const handleRecipeClick = (recipe) => {
-    console.log("recipe in my recipes",recipe)
+    console.log("recipe in my recipes", recipe)
     setSelectedRecipe(recipe);
   };
 
@@ -51,13 +51,13 @@ export default function MyRecipes() {
   }
 
   return (
-    <main className={`flex-1 ${theme === 'dark' ? 'bg-gray-900  ' : 'bg-white text-gray-900'}`}>
+    <main className={` p-5  relative flex-1 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white text-gray-900'}`}>
       <h2 className="text-3xl font-bold leading-tight tracking-tighter mb-4">My Recipes</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 scrollbar-thin">
+      <div className="  grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 scrollbar-thin">
         {userRecipes.map(recipe => (
           <div
             key={recipe._id}
-            className="cards cursor-pointer transform transition-transform hover:scale-105"
+            className="  cards cursor-pointer transform transition-transform hover:scale-105"
             onClick={() => handleRecipeClick(recipe)}
             aria-label={`View details for ${recipe.title}`}
           >
@@ -72,11 +72,18 @@ export default function MyRecipes() {
             </div>
           </div>
         ))}
-
+      </div>
+      <div className="recipe-popup-container fixed z-50 top-0 right-0 ">
         {selectedRecipe && (
-          <PopCardForRecipe selectedRecipe={selectedRecipe} handleCloseRecipe={handleCloseRecipe} />
+          <PopCardForRecipe
+          selectedRecipe={selectedRecipe}
+          handleCloseRecipe={handleCloseRecipe}
+          className="recipe-popup"
+        />
         )}
       </div>
-    </main>
+    </main >
   );
 }
+
+

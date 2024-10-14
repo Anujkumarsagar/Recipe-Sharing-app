@@ -3,10 +3,11 @@ import { PlusIcon, BookOpenIcon, UserIcon, CogIcon } from 'lucide-react';
 import { Link, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { getUserRecipes } from '../store/userSlice';
+import Navbar from "./Navbar.jsx"
 import MyRecipes from './MyRecipes';
 import Profile from './Profile.jsx';
 import Settings from './Settings.jsx';
-import CreateRecipe from './CreatRecipe.jsx'; // Fixed typo from 'CreatRecipe.jsx' to 'CreateRecipe.jsx'
+import CreateRecipe from './CreatRecipe.jsx';
 
 export default function ProfileDashboard() {
   const dispatch = useDispatch();
@@ -39,7 +40,10 @@ export default function ProfileDashboard() {
   };
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
+    <div className={` rounded-xl min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
+      <div className='pt-6'>
+        <Navbar />
+      </div>
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row">
         {/* Sidebar */}
         <aside className={`lg:flex max-sm:hidden w-full lg:w-64 lg:mr-8`}>
@@ -71,8 +75,9 @@ export default function ProfileDashboard() {
           </nav>
         </aside>
 
+
         {/* Main Content with Nested Routes */}
-        <main className="flex-1">
+        <main className="flex-1 ">
           <Routes>
             <Route path="myrecipes" element={
               <MyRecipes
@@ -101,7 +106,7 @@ export default function ProfileDashboard() {
       {/* Create Recipe Modal */}
       {showCreateRecipe && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-         <CreateRecipe  onClose={handleCloseCreateRecipe} /> 
+          <CreateRecipe onClose={handleCloseCreateRecipe} />
         </div>
       )}
     </div>

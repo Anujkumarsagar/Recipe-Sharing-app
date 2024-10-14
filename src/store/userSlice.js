@@ -11,7 +11,7 @@ const initialState = {
   categories: [],
   profileLoading: false,
   recipesLoading: false,
-  theme: localStorage.getItem('theme') || 'light'
+  theme: localStorage.getItem('theme') || 'light-mode'
 };
 
 export const fetchUserProfile = createAsyncThunk(
@@ -73,7 +73,8 @@ export const getUserRecipes = createAsyncThunk(
     }
     try {
       const response = await api.get('/user/profile');
-      return response.data.user.recipes;
+      console.log("the output in uesrslcie of get uer recipes", response.data)
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'An error occurred');
     }

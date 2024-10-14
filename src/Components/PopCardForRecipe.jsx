@@ -1,15 +1,42 @@
+
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { deleteRecipe } from '../store/recipeSlice';
+
+
 
 const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
+
+  const dispatch = useDispatch();
+
+  console.log("selectedRecipe", selectedRecipe)
   const [activeTab, setActiveTab] = useState('overview');
   const [isVisible, setIsVisible] = useState(false);
   const theme = useSelector((state) => state.user.theme);
   const currentUser = useSelector((state) => state.user.currentUser);
 
+
+  //handleDelete Button
+
+  const handleDelete =  async() => {
+    try {
+      const response =  dispatch(deleteRecipe(selectedRecipe._id))
+      console.log("response of delete", response)
+      handleClose()
+
+    } catch (error) {
+      console.error("something went wrong withh deleting recipe", error.message);
+
+    }
+  }
+  
   useEffect(() => {
+    
+
     if (selectedRecipe) {
-      console.log("selectedRecipe",selectedRecipe)
+      console.log("selectedRecipe", selectedRecipe);
+      console.log("currentuser", currentUser);
+
       setIsVisible(true);
       document.body.style.overflow = 'hidden'; // Stop scrolling when pop is on
     } else {
@@ -19,7 +46,7 @@ const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
     return () => {
       document.body.style.overflow = 'unset'; // Cleanup on component unmount
     };
-  }, [selectedRecipe]);
+  }, [selectedRecipe, handleDelete]);
 
   if (!selectedRecipe) return null;
 
@@ -28,19 +55,21 @@ const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
     setTimeout(handleCloseRecipe, 300);
   };
 
+
+  const recipeFounded = currentUser.recipes.find(recipe => recipe._id === selectedRecipe._id)
+  console.log("RecipeFounded", recipeFounded)
+
   const isOwnRecipe = currentUser && currentUser.id === selectedRecipe.authorId;
 
   return (
     <div
-      className={`fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4 transition-opacity duration-300 ${
-        isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
-      }`}
+      className={`  relative  h-[100vh] w-[100vw]  bg-black bg-opacity-50 flex justify-center items-center transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        } `}
     >
       <div
-        className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transition-all duration-300 ${
-          isVisible ? 'scale-100 opacity-100' : 'scale-90 opacity-0'
-        } sm:scale-100 sm:opacity-100`}
-        style={{ transform: 'scale(0.8)' }}
+        className={`  bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transition-all duration-300 ${isVisible ? 'scale-100 opacity-100' : 'scale-90 opacity-0'
+          } scale-75`}
+
       >
         <div className="relative">
           <img
@@ -69,7 +98,7 @@ const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
               />
             </svg>
           </button>
-          <h2 className="absolute bottom-4 left-4 text-3xl font-bold text-white">
+          <h2 className="absolute bottom-4 left-0 right-0 text-3xl font-bold text-white text-center">
             {selectedRecipe.title}
           </h2>
         </div>
@@ -79,11 +108,10 @@ const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
             {['overview', 'ingredients', 'instructions'].map((tab) => (
               <button
                 key={tab}
-                className={`px-4 py-2 font-medium ${
-                  activeTab === tab
+                className={`px-4 py-2 font-medium ${activeTab === tab
                     ? 'text-primary border-b-2 border-primary'
                     : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
+                  }`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -98,7 +126,7 @@ const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
                   {selectedRecipe.description}
                 </p>
                 <p className="text-gray-600 dark:text-gray-300 mb-2">
-                  <strong>Category:</strong> {selectedRecipe.category.name}
+                  {/* <strong>Category:</strong> {selectedRecipe.category.name} */}
                 </p>
                 <p className="text-gray-600 dark:text-gray-300">
                   <strong>Author:</strong> {isOwnRecipe ? 'You' : selectedRecipe.author}
@@ -109,7 +137,7 @@ const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
             {activeTab === 'ingredients' && (
               <ul className="space-y-2">
                 {selectedRecipe.ingredients?.map((ingredient, index) => (
-                  <li key={index} className="flex items-center">
+                  <li key={index} className="flex items-center text-white font-bold ">
                     <span className="h-2 w-2 bg-primary rounded-full mr-2" />
                     {ingredient}
                   </li>
@@ -120,7 +148,7 @@ const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
             {activeTab === 'instructions' && (
               <ol className="space-y-4">
                 {selectedRecipe.instructions?.map((instruction, index) => (
-                  <li key={index} className="flex">
+                  <li key={index} className="flex text-white font-bold">
                     <span className="font-bold text-primary mr-2">
                       {index + 1}.
                     </span>
@@ -131,7 +159,15 @@ const PopCardForRecipe = ({ selectedRecipe, handleCloseRecipe }) => {
             )}
           </div>
         </div>
+
+        {recipeFounded && <div className='absolute bottom-0 w-full flex my-3  '>
+          <h1 onClick={handleDelete} className='px-4 py-3 rounded-lg text-white bg-red-600 font-bold m-auto hover:scale-75 active:border-white  '>Delete</h1>
+        </div>
+
+        }
+
       </div>
+
     </div>
   );
 };

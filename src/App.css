@@ -72,6 +72,7 @@
 
 .light-mode {
     height: 100%;
+	border-radius: 10px;
 	background:
 		/* black shadows */
 		radial-gradient(circle at 50% 50%, var(--b42) calc(var(--sz) * 1), #fff0 calc(var(--sz) * 8)) var(--ts),

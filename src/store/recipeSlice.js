@@ -20,9 +20,9 @@ export const getAllRecipes = createAsyncThunk(
   'recipe/getAllRecipes',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get('http://localhost:3000/api/recipe/getAllRecipes');
-      console.log(" Response, ", response);
-      return response.data.data;
+      const response = await api.get('/recipe/getAllRecipes');
+      console.log("Response of get all recipes, ", response.data);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -123,6 +123,7 @@ const recipeSlice = createSlice({
       })
       .addCase(getAllRecipes.fulfilled, (state, action) => {
         state.getAllRecipesLoading = false;
+        console.log(`action payload ${action.Object}`)
         state.recipes = action.payload;
       })
       .addCase(getAllRecipes.rejected, (state, action) => {

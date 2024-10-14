@@ -1,26 +1,52 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllCategories } from '../store/categorySlice';
-import { getAllRecipes } from '../store/recipeSlice'; // Assuming you have a recipeSlice
-import RecipeList from './RecipeList'; // Assuming you have a RecipeList component
+import { getAllRecipes } from '../store/recipeSlice';
+import RecipeList from './RecipeList';
 
 const RecipeComponent = () => {
   const dispatch = useDispatch();
-  const categories = useSelector((state) => state.category.categories);
-  const recipes = useSelector((state) => state.recipe.recipes); // Assuming you have a recipe state
+  const categories = useSelector(state => state.category.categories);
+  const recipes = useSelector(state => state.recipe.recipes);
+  
+  useEffect(() => {
+    console.log("Recipes loaded:", recipes.length);
+    console.log("Categories loaded:", categories.length);
+  }, [recipes, categories]);
+
   const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
 
   useEffect(() => {
-    dispatch(getAllCategories());
-    dispatch(getAllRecipes());
+    const fetchCategories = async () => {
+      try {
+        const  response =  dispatch(getAllCategories());
+        console.log(response)
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    const fetchRecipes = async () => {
+      try {
+        await dispatch(getAllRecipes());
+        console.log("Recipes fetched successfully.");
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      }
+    };
+
+    fetchCategories();
+    fetchRecipes();
   }, [dispatch]);
 
   useEffect(() => {
     if (selectedCategory) {
-      setFilteredRecipes(recipes.filter(recipe => recipe.categoryId === selectedCategory));
+      setFilteredRecipes(recipes && recipes.filter(recipe => recipe.categoryId === selectedCategory));
+      console.log(`Filtered recipes for category ${selectedCategory}:`, filteredRecipes.length);
     } else {
       setFilteredRecipes(recipes);
+      console.log("Showing all recipes.");
     }
   }, [selectedCategory, recipes]);
 

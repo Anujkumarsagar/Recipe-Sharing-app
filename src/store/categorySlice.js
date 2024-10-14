@@ -20,8 +20,8 @@ export const getAllCategories = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/category/all');
-      console.log("response.data",response.data);
-      return response.data.categories;
+      console.log("response.data of category all",response.data);
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response.data);
     }
@@ -78,7 +78,7 @@ const categorySlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(getAllCategories.fulfilled, (state, action) => {
-        state.categories = action.payload;
+        state.categories = action.payload.categories;
       })
       .addCase(getCategoryById.fulfilled, (state, action) => {
         state.currentCategory = action.payload; // Adjusted this line to directly set currentCategory

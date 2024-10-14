@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SignupPage from './EnhancedLoginToggle';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../store/userSlice';
-import { getProfile } from '../store/userSlice';
+import { logout, getProfile } from '../store/userSlice';
+import { logo2 } from '../assets/Assets';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -15,59 +15,38 @@ const Navbar = () => {
 
   const handleProfileClick = () => {
     if (isAuthenticated) {
-      
       navigate("/profile/profile");
     } else {
       setIsLoginOpen(true);
     }
   };
 
-  
-
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
-    window.location.reload();
   };
 
   useEffect(() => {
     if (isAuthenticated && !profile) {
       dispatch(getProfile());
     }
-  }, [isAuthenticated, profile]);
+  }, [isAuthenticated, profile, dispatch]);
 
   useEffect(() => {
-    if (isLoginOpen || isNavOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
+    document.body.style.overflow = isLoginOpen || isNavOpen ? 'hidden' : 'unset';
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isLoginOpen, isNavOpen]);
 
+  const toggleLoginModal = () => {
+    setIsLoginOpen(!isLoginOpen);
+  };
+
   return (
-    <header className={`transition w-[80%] m-auto flex items-center justify-between h-16 px-4 md:px-6 ${theme === 'dark' ? 'bg-background text-white' : 'bg-background text-black'} border-b`}>
+    <header className={`transition w-[80%] m-auto flex items-center justify-between h-16 px-4 md:px-6 ${theme === 'dark' ? 'bg-background text-white' : 'bg-background text-black'} `}>
       <nav className="flex items-center gap-6">
-        <Link className="flex items-center gap-2 text-lg font-semibold" to="/" rel="ugc">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-6 h-6"
-          >
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-          </svg>
-          <span className="sr-only">Recipe App</span>
-        </Link>
+        <img src={logo2} alt="logo" className="h-12 md:h-20 filter invert bg-transparent xsm:h-10" />
         <div className="hidden md:flex font-bold gap-4">
           <Link to="/" className="text-foreground dotUnderline">Home</Link>
           <Link to="/recipes" className="font-bold text-foreground dotUnderline">Recipes</Link>
@@ -77,7 +56,8 @@ const Navbar = () => {
         </div>
         <button
           className="md:hidden text-foreground"
-          onClick={() => setIsNavOpen(true)}
+          onClick={() => setIsNavOpen((prev) => !prev)}
+          aria-label="Toggle navigation"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -130,7 +110,6 @@ const Navbar = () => {
               type="button"
               aria-haspopup="menu"
               aria-expanded="false"
-              data-state="closed"
             >
               <span className="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8">
                 <img className="aspect-square h-full w-full" alt="User" src={profile?.profilePic || "https://gravatar.com/avatar/1d1106d0b15053200c50c641d2d5bbd7?s=400&d=robohash&r=x"} />
@@ -145,7 +124,7 @@ const Navbar = () => {
           </div>
         ) : (
           <button
-            onClick={() => setIsLoginOpen(true)}
+            onClick={toggleLoginModal}
             className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-medium dotUnderline px-4 py-2"
           >
             <svg
@@ -170,33 +149,46 @@ const Navbar = () => {
       </div>
 
       {isLoginOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white scale-75 rounded-lg p-1" style={{ maxWidth: '400px', width: '90%', margin: 'auto' }}>
-            <SignupPage onClose={() => setIsLoginOpen(false)} />
+            <SignupPage onClose={toggleLoginModal} />
           </div>
         </div>
       )}
 
       {isNavOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className={`bg-white dark:bg-gray-800 p-8 rounded-lg`} style={{ maxWidth: '400px', width: '90%', margin: 'auto' }}>
             <nav className="flex flex-col gap-4">
               <Link to="/" className="text-foreground dark:text-gray-100 dotUnderline" onClick={() => setIsNavOpen(false)}>Home</Link>
               <Link to="/recipes" className="font-bold text-foreground dark:text-gray-100 dotUnderline" onClick={() => setIsNavOpen(false)}>Recipes</Link>
-              {isAuthenticated && (
+              {isAuthenticated ? (
                 <>
                   <Link to="/profile/myrecipes" className="text-foreground dark:text-gray-100 dotUnderline" onClick={() => setIsNavOpen(false)}>My Recipes</Link>
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      handleLogout();
+                      setIsNavOpen(false);
+                    }}
                     className="inline-flex items-center gap-2 rounded-lg bg-red-500 text-white font-medium px-4 py-2 hover:bg-red-600 transition-colors"
                   >
                     Logout
                   </button>
                 </>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsNavOpen(false);
+                    toggleLoginModal();
+                  }}
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary text-primary-foreground font-medium dotUnderline px-4 py-2"
+                >
+                  Login
+                </button>
               )}
               <button
                 onClick={() => setIsNavOpen(false)}
-                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-500 text-white font-medium px-4 py-2 hover:bg-red-600 transition-colors"
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gray-500 text-white font-medium px-4 py-2 hover:bg-gray-600 transition-colors"
               >
                 Close
               </button>
