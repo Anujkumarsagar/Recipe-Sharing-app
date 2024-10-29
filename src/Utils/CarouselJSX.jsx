@@ -12,7 +12,7 @@ const recipes = [
   {
     id: 2,
     title: "Chicken Tikka Masala",
-    description: "Creamy and spicy Indian curry with tender chicken pieces",
+    description: "Creamy and spicy Indian curry with tender ",
     image: "/placeholder.svg?height=200&width=300"
   },
   {
@@ -63,7 +63,7 @@ export default function CarouselJSX() {
   };
 
   return (
-    <div className={`relative w-full rounded-md max-w-[80%] mx-auto overflow-hidden backdrop-blur-sm  ${theme ==="dark"? "dark:bg-gray-900/30" : "bg-white/30" }`}>
+    <div className={`relative  h-[350px]  w-full rounded-md max-w-[80%] mx-auto overflow-hidden backdrop-blur-sm  `}>
       <div className="relative overflow-hidden">
         <div 
           className="flex transition-transform duration-300"
@@ -81,7 +81,7 @@ export default function CarouselJSX() {
                   alt={recipe.title} 
                   className="w-full h-48 object-cover"
                 />
-                <div className="p-4">
+                <div className="p-4 h-fit">
                   <h3 className="text-xl font-semibold mb-2">{recipe.title}</h3>
                   <p className="text-gray-600">{recipe.description}</p>
                 </div>

@@ -3,6 +3,7 @@ import api from '../api';
 
 const initialState = {
   currentUser: null,
+  recipeUser: null,
   isAuthenticated: !!localStorage.getItem('token'),
   loading: false,
   error: null,
@@ -11,20 +12,24 @@ const initialState = {
   categories: [],
   profileLoading: false,
   recipesLoading: false,
-  theme: localStorage.getItem('theme') || 'light-mode'
+  theme: localStorage.getItem('theme') || 'light-mode',
+  allUser:[],
 };
 
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchProfile',
   async (userId, { rejectWithValue }) => {
     try {
-      const response = await api.get("/user/profile");
-      return response.data.Object;
+      const response = await api.get(`/user/profile/${userId}`);
+      //console
+      console.log("response in fetchUserProfile", response);
+      return response.data.user;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'An error occurred');
     }
   }
 );
+
 
 export const signUp = createAsyncThunk(
   'user/signUp',
@@ -40,6 +45,20 @@ export const signUp = createAsyncThunk(
       } else {
         return rejectWithValue('Signup failed: Invalid response from server');
       }
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'An error occurred');
+    }
+  }
+);
+
+//get all user 
+
+export const getAllUsers = createAsyncThunk(
+  'user/getAllUsers',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/user/all-users');
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'An error occurred');
     }
@@ -108,11 +127,12 @@ export const removeFromFavorites = createAsyncThunk(
 export const getProfile = createAsyncThunk(
   'user/getProfile',
   async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.get('user/profile');
+    try { 
+      const response = await api.get('user/profile')
       return response.data.user;
     } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to fetch profile');
+      console.log("error in getprofile", error)
+      return rejectWithValue(error.response?.data.message || 'Failed to fetch profile');
     }
   }
 );
@@ -162,21 +182,35 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+
+    .addCase(getAllUsers.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(getAllUsers.fulfilled, (state, action) => {
+      state.allUser = action.payload;
+      state.loading = false;
+      state.error = null;
+    })
+    .addCase(getAllUsers.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload || 'Failed to fetch all users';
+    })
       .addCase(fetchUserProfile.pending, (state) => {
         state.profileLoading = true;
         state.error = null;
       })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
-        state.currentUser = action.payload;
-        state.isAuthenticated = true;
+        state.recipeUser = action.payload;
+        // state.isAuthenticated = true;
         state.profileLoading = false;
         state.error = null;
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.profileLoading = false;
         state.error = action.payload || 'Failed to fetch user profile';
-        state.currentUser = null;
-        state.isAuthenticated = false;
+        state.recipeUser = null;
+        // state.isAuthenticated = false;
       })
       .addCase(signUp.pending, (state) => {
         state.loading = true;

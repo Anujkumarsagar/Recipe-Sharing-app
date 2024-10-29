@@ -1,258 +1,140 @@
-import React, { useState, useEffect } from 'react';
-import { Bell, Moon, Sun, Globe, Lock, Eye, EyeOff } from 'lucide-react';
-import { useSelector, useDispatch } from 'react-redux';
-import { getProfile } from '../store/userSlice';
-import api from '../api';
+'use client';
 
-export default function Settings() {
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { createFeedback } from '../store/recipeSlice';
+
+export default function FeedbackForm() {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  const { profile } = useSelector((state) => state.user);
-  const [settings, setSettings] = useState({
-    notifications: {
-      email: true,
-      push: false,
-      sms: false,
-    },
-    theme: 'light',
-    language: 'en',
-    privacy: {
-      profileVisibility: 'public',
-      showEmail: false,
-    },
-    password: '',
-    confirmPassword: '',
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const response = await api.get('/settings');
-        setSettings(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch settings. Please try again later.');
-        setLoading(false);
-      }
-    };
-
-    if (isAuthenticated) {
-      dispatch(getProfile());
-      fetchSettings();
-    } else {
-      setLoading(false);
-    }
-  }, [isAuthenticated, dispatch]);
-
-  const handleNotificationChange = (type) => {
-    setSettings((prev) => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        [type]: !prev.notifications[type],
-      },
-    }));
-  };
-
-  const handleThemeChange = (theme) => {
-    setSettings((prev) => ({ ...prev, theme }));
-    // Here you would typically apply the theme to your application
-  };
-
-  const handleLanguageChange = (e) => {
-    setSettings((prev) => ({ ...prev, language: e.target.value }));
-  };
-
-  const handlePrivacyChange = (setting, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      privacy: {
-        ...prev.privacy,
-        [setting]: value,
-      },
-    }));
-  };
-
-  const handlePasswordChange = (e) => {
-    setSettings((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const { currentUser } = useSelector((state) => state.user);
+  
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState(currentUser.email || ''); // Initialize with currentUser email
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [rating, setRating] = useState(0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
+    // Basic validation
+    if (!name || !email || !message || rating === 0) {
+      setError('Please fill in all fields and provide a rating.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const response = await api.put('/settings', settings);
-      dispatch(getProfile());
-      // Show success message to user
+      // Create feedback using the dispatch
+      await dispatch(createFeedback({ name, email, message, rating })).unwrap();
+
+      // Reset form fields
+      setName('');
+      setMessage('');
+      setRating(0);
+      setIsSubmitted(true);
     } catch (error) {
-      // Show error message to user
-      console.error('Failed to update settings:', error);
+      setError('An error occurred while submitting your feedback. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      // Hide success message after 5 seconds
+      setTimeout(() => setIsSubmitted(false), 5000);
     }
   };
 
-  if (loading) return <div className="text-center py-8">Loading...</div>;
-  if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
-
   return (
-    <>
-      {isAuthenticated ? (
-        <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 md:p-8">
-            <h2 className="text-2xl font-bold mb-6">Settings</h2>
-
-            {/* Notifications Section */}
-            <section className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Notifications</h3>
-              <div className="space-y-2">
-                {Object.entries(settings.notifications).map(([type, enabled]) => (
-                  <label key={type} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={enabled}
-                      onChange={() => handleNotificationChange(type)}
-                      className="form-checkbox h-5 w-5 text-blue-600"
-                    />
-                    <span className="ml-2 text-gray-700 capitalize">{type} notifications</span>
-                  </label>
-                ))}
-              </div>
-            </section>
-
-            {/* Theme Section */}
-            <section className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Theme</h3>
-              <div className="flex flex-wrap gap-4">
-                <button
-                  type="button"
-                  onClick={() => handleThemeChange('light')}
-                  className={`flex items-center px-4 py-2 rounded-md ${settings.theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}
-                >
-                  <Sun className="w-5 h-5 mr-2" />
-                  Light
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleThemeChange('dark')}
-                  className={`flex items-center px-4 py-2 rounded-md ${settings.theme === 'dark' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}
-                >
-                  <Moon className="w-5 h-5 mr-2" />
-                  Dark
-                </button>
-              </div>
-            </section>
-
-            {/* Language Section */}
-            <section className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Language</h3>
-              <div className="flex items-center">
-                <Globe className="w-5 h-5 mr-2 text-gray-500" />
-                <select
-                  value={settings.language}
-                  onChange={handleLanguageChange}
-                  className="form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                >
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="de">Deutsch</option>
-                </select>
-              </div>
-            </section>
-
-            {/* Privacy Section */}
-            <section className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Privacy</h3>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="profileVisibility" className="block text-sm font-medium text-gray-700">Profile Visibility</label>
-                  <select
-                    id="profileVisibility"
-                    value={settings.privacy.profileVisibility}
-                    onChange={(e) => handlePrivacyChange('profileVisibility', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                  >
-                    <option value="public">Public</option>
-                    <option value="private">Private</option>
-                    <option value="friends">Friends Only</option>
-                  </select>
-                </div>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={settings.privacy.showEmail}
-                    onChange={(e) => handlePrivacyChange('showEmail', e.target.checked)}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                  <span className="ml-2 text-gray-700">Show email on profile</span>
-                </label>
-              </div>
-            </section>
-
-            {/* Password Change Section */}
-            <section className="mb-8">
-              <h3 className="text-lg font-semibold mb-4">Change Password</h3>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">New Password</label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      id="password"
-                      name="password"
-                      value={settings.password}
-                      onChange={handlePasswordChange}
-                      className="form-input block w-full rounded-md border-gray-300 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                      placeholder="Enter new password"
-                    />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5 text-gray-400 cursor-pointer" onClick={() => setShowPassword(false)} />
-                      ) : (
-                        <Eye className="h-5 w-5 text-gray-400 cursor-pointer" onClick={() => setShowPassword(true)} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm New Password</label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      value={settings.confirmPassword}
-                      onChange={handlePasswordChange}
-                      className="form-input block w-full rounded-md border-gray-300 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                      placeholder="Confirm new password"
-                    />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5 text-gray-400 cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
-                      ) : (
-                        <Eye className="h-5 w-5 text-gray-400 cursor-pointer" onClick={() => setShowConfirmPassword(true)} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Save Button */}
-            <button
-              type="submit"
-              className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Save Settings
-            </button>
-          </form>
+    <div className="max-w-md mx-3 md:mx-auto mt-8 p-6 bg-gray-800 rounded-lg shadow-md sm:p-8 lg:max-w-lg">
+      <h2 className="text-2xl font-bold mb-6">Feedback Form</h2>
+      {isSubmitted ? (
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+          <p className="font-bold">Thank you for your feedback!</p>
+          <p>We appreciate your input and will review it shortly.</p>
         </div>
       ) : (
-        <div className="text-center text-gray-600">Please log in to view your settings.</div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-white">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1 block w-full text-black rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-white">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 block w-full text-black rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              required
+              readOnly={!!currentUser.email} // Makes the input uneditable if currentUser.email exists
+            />
+          </div>
+          <div>
+            <label htmlFor="rating" className="block text-sm font-medium text-white">
+              Rating
+            </label>
+            <div className="flex items-center mt-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  className={`text-2xl ${star <= rating ? 'text-yellow-400' : 'text-gray-400'} hover:text-yellow-500`}
+                  onClick={() => setRating(star)}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label htmlFor="message" className="block text-sm font-medium text-white">
+              Feedback
+            </label>
+            <textarea
+              id="message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={4}
+              className="mt-1 text-black block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              required
+            ></textarea>
+          </div>
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+              <p>{error}</p>
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+          </button>
+        </form>
       )}
-    </>
+    </div>
   );
 }

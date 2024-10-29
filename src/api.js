@@ -2,7 +2,7 @@ import axios from 'axios';
 import { logout, setTheme } from './store/userSlice';
 
 const api = axios.create({
-  baseURL: 'https://backendrecipesharing.onrender.com/api',
+  baseURL: import.meta.env.VITE_BACKEND_URL, // Ensure VITE_ prefix
   withCredentials: true,
 });
 
@@ -13,7 +13,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-    config.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173';
+    // You do not need to set Access-Control-Allow-Origin here, it's a server-side header
     return config;
   },
   (error) => Promise.reject(error)
@@ -29,8 +29,7 @@ api.interceptors.response.use(
       import('./store').then(({ default: store }) => {
         store.dispatch(logout());
       });
-      // Redirect to login page or show login modal
-      // You might want to use a routing library or custom logic here
+      // Redirect to login page or handle login logic
     }
     return Promise.reject(error);
   }
@@ -46,6 +45,7 @@ import('./store').then(({ default: store }) => {
 
 export default api;
 
+// Login function
 export const login = (credentials) => {
   return api.post('/auth/login', credentials);
 };

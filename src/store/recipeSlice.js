@@ -16,6 +16,49 @@ export const createRecipe = createAsyncThunk(
   }
 );
 
+// feedback
+
+export const createFeedback = createAsyncThunk(
+  'recipe/createFeedback',
+  async (feedbackData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/feedback', feedbackData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+//get feedack
+
+// get feedback
+export const getFeedback = createAsyncThunk(
+  'recipe/getFeedback',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/feedback');
+      return response.data;  // Return the feedback data directly
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+//like recipe
+
+export const likeRecipe = createAsyncThunk(
+  'recipe/likeRecipe',
+  async (recipeId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`/recipe/${recipeId}/like`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const getAllRecipes = createAsyncThunk(
   'recipe/getAllRecipes',
   async (_, { rejectWithValue }) => {
@@ -113,122 +156,138 @@ const recipeSlice = createSlice({
     updateRecipeError: null,
     deleteRecipeLoading: false,
     deleteRecipeError: null,
+    feedback: [],  // Store feedback in the state
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
+
+      .addCase(getFeedback.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getFeedback.fulfilled, (state, action) => {
+        state.loading = false;
+        state.feedback = action.payload;  // Save feedback to the state
+      })
+      .addCase(getFeedback.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       .addCase(getAllRecipes.pending, (state) => {
         state.getAllRecipesLoading = true;
         state.getAllRecipesError = null;
       })
-      .addCase(getAllRecipes.fulfilled, (state, action) => {
-        state.getAllRecipesLoading = false;
-        console.log(`action payload ${action.Object}`)
-        state.recipes = action.payload;
-      })
-      .addCase(getAllRecipes.rejected, (state, action) => {
-        state.getAllRecipesLoading = false;
-        state.getAllRecipesError = action.payload;
-      })
-      .addCase(getRecipeById.pending, (state) => {
-        state.getRecipeByIdLoading = true;
-        state.getRecipeByIdError = null;
-      })
-      .addCase(getRecipeById.fulfilled, (state, action) => {
-        state.getRecipeByIdLoading = false;
+    .addCase(getAllRecipes.fulfilled, (state, action) => {
+      state.getAllRecipesLoading = false;
+      console.log(`action payload ${action.Object}`)
+      state.recipes = action.payload;
+    })
+    .addCase(getAllRecipes.rejected, (state, action) => {
+      state.getAllRecipesLoading = false;
+      state.getAllRecipesError = action.payload;
+    })
+    .addCase(getRecipeById.pending, (state) => {
+      state.getRecipeByIdLoading = true;
+      state.getRecipeByIdError = null;
+    })
+    .addCase(getRecipeById.fulfilled, (state, action) => {
+      state.getRecipeByIdLoading = false;
+      state.currentRecipe = action.payload;
+    })
+    .addCase(getRecipeById.rejected, (state, action) => {
+      state.getRecipeByIdLoading = false;
+      state.getRecipeByIdError = action.payload;
+    })
+    .addCase(deleteRecipe.pending, (state) => {
+      state.deleteRecipeLoading = true;
+      state.deleteRecipeError = null;
+    })
+    .addCase(deleteRecipe.fulfilled, (state, action) => {
+      state.deleteRecipeLoading = false;
+      state.recipes = state.recipes.filter(recipe => recipe._id !== action.payload);
+    })
+    .addCase(deleteRecipe.rejected, (state, action) => {
+      state.deleteRecipeLoading = false;
+      state.deleteRecipeError = action.payload;
+    })
+    .addCase(createRecipe.pending, (state) => {
+      state.createRecipeLoading = true;
+      state.createRecipeError = null;
+    })
+    .addCase(createRecipe.fulfilled, (state, action) => {
+      state.createRecipeLoading = false;
+      state.recipes.push(action.payload);
+    })
+    .addCase(createRecipe.rejected, (state, action) => {
+      state.createRecipeLoading = false;
+      state.createRecipeError = action.payload;
+    })
+    .addCase(updateRecipe.pending, (state) => {
+      state.updateRecipeLoading = true;
+      state.updateRecipeError = null;
+    })
+    .addCase(updateRecipe.fulfilled, (state, action) => {
+      state.updateRecipeLoading = false;
+      const index = state.recipes.findIndex(recipe => recipe._id === action.payload._id);
+      if (index !== -1) {
+        state.recipes[index] = action.payload;
+      }
+      if (state.currentRecipe && state.currentRecipe._id === action.payload._id) {
         state.currentRecipe = action.payload;
-      })
-      .addCase(getRecipeById.rejected, (state, action) => {
-        state.getRecipeByIdLoading = false;
-        state.getRecipeByIdError = action.payload;
-      })
-      .addCase(deleteRecipe.pending, (state) => {
-        state.deleteRecipeLoading = true;
-        state.deleteRecipeError = null;
-      })
-      .addCase(deleteRecipe.fulfilled, (state, action) => {
-        state.deleteRecipeLoading = false;
-        state.recipes = state.recipes.filter(recipe => recipe._id !== action.payload);
-      })
-      .addCase(deleteRecipe.rejected, (state, action) => {
-        state.deleteRecipeLoading = false;
-        state.deleteRecipeError = action.payload;
-      })
-      .addCase(createRecipe.pending, (state) => {
-        state.createRecipeLoading = true;
-        state.createRecipeError = null;
-      })
-      .addCase(createRecipe.fulfilled, (state, action) => {
-        state.createRecipeLoading = false;
-        state.recipes.push(action.payload);
-      })
-      .addCase(createRecipe.rejected, (state, action) => {
-        state.createRecipeLoading = false;
-        state.createRecipeError = action.payload;
-      })
-      .addCase(updateRecipe.pending, (state) => {
-        state.updateRecipeLoading = true;
-        state.updateRecipeError = null;
-      })
-      .addCase(updateRecipe.fulfilled, (state, action) => {
-        state.updateRecipeLoading = false;
-        const index = state.recipes.findIndex(recipe => recipe._id === action.payload._id);
-        if (index !== -1) {
-          state.recipes[index] = action.payload;
-        }
-        if (state.currentRecipe && state.currentRecipe._id === action.payload._id) {
-          state.currentRecipe = action.payload;
-        }
-      })
-      .addCase(updateRecipe.rejected, (state, action) => {
-        state.updateRecipeLoading = false;
-        state.updateRecipeError = action.payload;
-      })
-      .addCase(searchRecipes.pending, (state) => {
-        state.searchRecipesLoading = true;
-        state.searchRecipesError = null;
-      })
-      .addCase(searchRecipes.fulfilled, (state, action) => {
-        state.searchRecipesLoading = false;
-        state.recipes = action.payload;
-      })
-      .addCase(searchRecipes.rejected, (state, action) => {
-        state.searchRecipesLoading = false;
-        state.searchRecipesError = action.payload;
-      })
-      .addCase(getRecipesByCategory.pending, (state) => {
-        state.getRecipesByCategoryLoading = true;
-        state.getRecipesByCategoryError = null;
-      })
-      .addCase(getRecipesByCategory.fulfilled, (state, action) => {
-        state.getRecipesByCategoryLoading = false;
-        state.recipes = action.payload;
-      })
-      .addCase(getRecipesByCategory.rejected, (state, action) => {
-        state.getRecipesByCategoryLoading = false;
-        state.getRecipesByCategoryError = action.payload;
-      })
-      .addMatcher(
-        (action) => action.type.endsWith('/pending'),
-        (state) => {
-          state.loading = true;
-          state.error = null;
-        }
-      )
-      .addMatcher(
-        (action) => action.type.endsWith('/fulfilled'),
-        (state) => {
-          state.loading = false;
-        }
-      )
-      .addMatcher(
-        (action) => action.type.endsWith('/rejected'),
-        (state, action) => {
-          state.loading = false;
-          state.error = action.payload;
-        }
-      );
-  },
+      }
+    })
+    .addCase(updateRecipe.rejected, (state, action) => {
+      state.updateRecipeLoading = false;
+      state.updateRecipeError = action.payload;
+    })
+    .addCase(searchRecipes.pending, (state) => {
+      state.searchRecipesLoading = true;
+      state.searchRecipesError = null;
+    })
+    .addCase(searchRecipes.fulfilled, (state, action) => {
+      state.searchRecipesLoading = false;
+      state.recipes = action.payload;
+    })
+    .addCase(searchRecipes.rejected, (state, action) => {
+      state.searchRecipesLoading = false;
+      state.searchRecipesError = action.payload;
+    })
+    .addCase(getRecipesByCategory.pending, (state) => {
+      state.getRecipesByCategoryLoading = true;
+      state.getRecipesByCategoryError = null;
+    })
+    .addCase(getRecipesByCategory.fulfilled, (state, action) => {
+      state.getRecipesByCategoryLoading = false;
+      state.recipes = action.payload;
+    })
+    .addCase(getRecipesByCategory.rejected, (state, action) => {
+      state.getRecipesByCategoryLoading = false;
+      state.getRecipesByCategoryError = action.payload;
+    })
+
+
+    .addMatcher(
+      (action) => action.type.endsWith('/pending'),
+      (state) => {
+        state.loading = true;
+        state.error = null;
+      }
+    )
+    .addMatcher(
+      (action) => action.type.endsWith('/fulfilled'),
+      (state) => {
+        state.loading = false;
+      }
+    )
+    .addMatcher(
+      (action) => action.type.endsWith('/rejected'),
+      (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      }
+    );
+},
 });
 
 export default recipeSlice.reducer;

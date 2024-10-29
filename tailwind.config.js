@@ -6,6 +6,13 @@ export default {
   ],
   theme: {
     extend: {
+
+      textStrokeWidth: {
+        '1': '1px',
+        '2': '2px',
+        '4': '4px',
+      }
+      ,
       animation: {
         'fade-in': 'fadeIn 1s ease-out'
       },
@@ -17,6 +24,21 @@ export default {
       }
     }
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.text-stroke-1': {
+          '-webkit-text-stroke-width': '1px',
+        },
+        '.text-stroke-2': {
+          '-webkit-text-stroke-width': '2px',
+        },
+        '.text-stroke-4': {
+          '-webkit-text-stroke-width': '4px',
+        },
+      };
+      addUtilities(newUtilities, ['responsive', 'hover']);
+    }
+  ]
 }
 

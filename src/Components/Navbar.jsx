@@ -16,6 +16,7 @@ const Navbar = () => {
   const handleProfileClick = () => {
     if (isAuthenticated) {
       navigate("/profile/profile");
+      
     } else {
       setIsLoginOpen(true);
     }
@@ -24,13 +25,19 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
+    //reload page 
+    window.location.reload();
   };
 
   useEffect(() => {
+   const checking = () => {
     if (isAuthenticated && !profile) {
       dispatch(getProfile());
+    
     }
-  }, [isAuthenticated, profile, dispatch]);
+   }
+   checking();
+  }, [localStorage.getItem("token"), isAuthenticated, profile]);
 
   useEffect(() => {
     document.body.style.overflow = isLoginOpen || isNavOpen ? 'hidden' : 'unset';
@@ -44,8 +51,8 @@ const Navbar = () => {
   };
 
   return (
-    <header className={`transition w-[80%] m-auto flex items-center justify-between h-16 px-4 md:px-6 ${theme === 'dark' ? 'bg-background text-white' : 'bg-background text-black'} `}>
-      <nav className="flex items-center gap-6">
+    <header className={`transition w-[100%] m-auto flex   items-center justify-between h-16 px-4 md:px-6 ${theme === 'dark' ? 'bg-background text-white' : 'bg-background text-black'} `}>
+      <nav className="flex  items-center gap-6">
         <img src={logo2} alt="logo" className="h-12 md:h-20 filter invert bg-transparent xsm:h-10" />
         <div className="hidden md:flex font-bold gap-4">
           <Link to="/" className="text-foreground dotUnderline">Home</Link>
@@ -102,7 +109,7 @@ const Navbar = () => {
           />
         </form>
 
-        {isAuthenticated ? (
+        {isAuthenticated  ? (
           <div className="flex items-center gap-4">
             <button
               onClick={handleProfileClick}
@@ -157,7 +164,7 @@ const Navbar = () => {
       )}
 
       {isNavOpen && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="absolute inset-0 bg-black rounded-lg bg-opacity-50 flex items-center justify-center z-50">
           <div className={`bg-white dark:bg-gray-800 p-8 rounded-lg`} style={{ maxWidth: '400px', width: '90%', margin: 'auto' }}>
             <nav className="flex flex-col gap-4">
               <Link to="/" className="text-foreground dark:text-gray-100 dotUnderline" onClick={() => setIsNavOpen(false)}>Home</Link>
@@ -169,6 +176,7 @@ const Navbar = () => {
                     onClick={() => {
                       handleLogout();
                       setIsNavOpen(false);
+                      dispatch(getProfile());
                     }}
                     className="inline-flex items-center gap-2 rounded-lg bg-red-500 text-white font-medium px-4 py-2 hover:bg-red-600 transition-colors"
                   >

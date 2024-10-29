@@ -8,47 +8,37 @@ const RecipeComponent = () => {
   const dispatch = useDispatch();
   const categories = useSelector(state => state.category.categories);
   const recipes = useSelector(state => state.recipe.recipes);
-  
-  useEffect(() => {
-    console.log("Recipes loaded:", recipes.length);
-    console.log("Categories loaded:", categories.length);
-  }, [recipes, categories]);
-
   const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const  response =  dispatch(getAllCategories());
-        console.log(response)
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-
-    const fetchRecipes = async () => {
-      try {
+        await dispatch(getAllCategories());
         await dispatch(getAllRecipes());
-        console.log("Recipes fetched successfully.");
+        console.log("Data fetched successfully.");
       } catch (error) {
-        console.error("Error fetching recipes:", error);
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchCategories();
-    fetchRecipes();
+    fetchData();
   }, [dispatch]);
 
   useEffect(() => {
     if (selectedCategory) {
-      setFilteredRecipes(recipes && recipes.filter(recipe => recipe.categoryId === selectedCategory));
-      console.log(`Filtered recipes for category ${selectedCategory}:`, filteredRecipes.length);
+      setFilteredRecipes(recipes.filter(recipe => recipe.categoryId === selectedCategory));
     } else {
       setFilteredRecipes(recipes);
-      console.log("Showing all recipes.");
     }
   }, [selectedCategory, recipes]);
+
+  if (loading) {
+    return <div>Loading...</div>; // Show a loading indicator
+  }
 
   return (
     <div>

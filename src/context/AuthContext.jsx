@@ -41,8 +41,27 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
   };
 
+  const handleLikeButton = async (recipeId) => {
+    if (!user) return; // If user is not logged in, do not proceed
+
+    try {
+      // Send the like request to the server
+      await axios.put(`/api/recipes/${recipeId}/like`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+
+      // Update the user's likes count
+      setUser(prevUser => ({
+        ...prevUser,
+        likes: (prevUser.likes || 0) + 1 // Ensure previous likes count exists
+      }));
+    } catch (error) {
+      console.error('Failed to like the recipe:', error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, handleLikeButton }}>
       {children}
     </AuthContext.Provider>
   );

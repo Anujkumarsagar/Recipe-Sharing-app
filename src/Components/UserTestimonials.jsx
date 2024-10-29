@@ -1,46 +1,41 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getFeedback } from '../store/recipeSlice';
 
 export default function UserTestimonials() {
   const theme = useSelector((state) => state.user.theme); // Get theme from Redux store
-
+  const dispatch = useDispatch(); // Correctly use dispatch
+  const feedbackList = useSelector((state) => state.recipe.feedback); // Assuming your feedback is stored here
+  
+  
+  useEffect(() => {
+    dispatch(getFeedback()); // Fetch feedback on component mount
+  }, [dispatch]);
+  
   return (
     <section className={`py-12 shadow-sm px-4 md:px-6 z-10`}>
       <div className="max-w-6xl mx-auto">
-        <h2 className={`text-3xl font-bold text-center mb-8`}>What Our Users Say</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <TestimonialCard
-            name="Priya Sharma"
-            avatar="/placeholder.svg?height=40&width=40"
-            comment="I love the variety of recipes! The step-by-step instructions make cooking so easy."
-            rating={5}
-            theme={theme}
-          />
-          <TestimonialCard
-            name="Rahul Patel"
-            avatar="/placeholder.svg?height=40&width=40"
-            comment="This website has transformed my cooking skills. The community is so supportive!"
-            rating={4}
-            theme={theme}
-          />
-          <TestimonialCard
-            name="Anita Desai"
-            avatar="/placeholder.svg?height=40&width=40"
-            comment="The recipes are authentic and delicious. I've impressed my family with my new dishes!"
-            rating={5}
-            theme={theme}
-          />
+        <h2 className={` text-4xl md:text-5xl font-bold text-right mb-8 text-gray-800  flex-nowrap  `}>What Our Users Say</h2>
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
+          {feedbackList.slice(0,4).map((feedback) => (
+            <TestimonialCard
+              key={feedback.id} // Assuming feedback has a unique id
+              name={feedback.name}
+              comment={feedback.message} // Adjust based on your data structure
+              rating={feedback.rating} // Assuming rating is part of the feedback
+              theme={theme}
+            />
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-function TestimonialCard({ name, avatar, comment, rating, theme }) {
+function TestimonialCard({ name, comment, rating, theme }) {
   return (
     <div className={`p-6 rounded-lg shadow-lg transition-all hover:cursor-auto hover:shadow-2xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-slate-300'} border-2`}>
       <div className="flex items-center space-x-4 mb-4">
-        <img src={avatar} alt={name} className="w-10 h-20 rounded-full" />
         <div>
           <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{name}</h3>
           <div className="flex">

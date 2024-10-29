@@ -9,21 +9,23 @@ export default function RecipeComponent() {
   const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedRecipe, setSelectedRecipe] = useState(null); // Set to null when no recipe is selected
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  console.log("recipe in recipe component", selectedRecipe)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
-
   const { recipes, error } = useSelector((state) => state.recipe);
   const { categories } = useSelector((state) => state.category);
-  const { theme } = useSelector((state) => state.user); // Added to handle theme
+  const { theme } = useSelector((state) => state.user);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch all recipes and categories on component load
   useEffect(() => {
-    dispatch(getAllRecipes());
-    dispatch(getAllCategories());
+    const fetchData = async () => {
+      await Promise.all([dispatch(getAllRecipes()), dispatch(getAllCategories())]);
+      setLoading(false);
+    };
+    fetchData();
   }, [dispatch]);
 
-  // Fetch recipes by category when category is changed
   useEffect(() => {
     if (selectedCategory !== 'All') {
       dispatch(getRecipesByCategory(selectedCategory));
@@ -32,53 +34,47 @@ export default function RecipeComponent() {
     }
   }, [dispatch, selectedCategory]);
 
-  // Handle search input
   const handleSearch = useCallback((event) => {
     setSearchTerm(event.target.value);
     setCurrentPage(1);
   }, []);
 
-  // Handle category change
   const handleCategoryChange = useCallback((category) => {
     setSelectedCategory(category);
     setSearchTerm('');
     setCurrentPage(1);
   }, []);
 
-  // Handle recipe click to open the recipe details in a popup
   const handleRecipeClick = useCallback((recipe) => {
     setSelectedRecipe(recipe);
-    console.log(selectedRecipe)
+    console.log(recipe);
   }, []);
 
-  // Close the recipe popup
   const handleCloseRecipe = useCallback(() => {
-    setSelectedRecipe(null); // Set to null instead of []
+    setSelectedRecipe(null);
   }, []);
 
-  // Pagination handler
   const paginate = useCallback((pageNumber) => setCurrentPage(pageNumber), []);
 
-  // Filter recipes by search term
   const filteredRecipes = recipes?.data?.filter(recipe =>
     recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Get the current recipes for pagination
   const currentRecipes = filteredRecipes?.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  // Calculate total number of pages
   const totalPages = Math.ceil(filteredRecipes?.length / itemsPerPage);
 
+  if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message || error}</div>;
 
   return (
-    <div className={`relative mx-auto p-4 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'} rounded-lg`}> {/* Adjusted to handle theme */}
-      <Navbar />
+    <div className={` relative mx-auto ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'} rounded-lg`}>
+      <div className='sticky top-0 bg-gray-800 z-10 mb-6 w-full rounded-lg' >
+        <Navbar />
+      </div>
       <h1 className="text-3xl font-bold text-center mb-6">Recipes</h1>
 
       {/* Search Bar */}
-      <div className="flex flex-col items-center mb-6">
+      <div className="flex flex-col items-center mb-6 p-4 ">
         <input
           type="text"
           placeholder="Search recipes..."
@@ -88,7 +84,7 @@ export default function RecipeComponent() {
         />
 
         {/* Category Buttons */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 ">
           <button
             onClick={() => handleCategoryChange('All')}
             className={`px-4 py-2 border border-gray-300 rounded ${selectedCategory === 'All' ? 'bg-slate-400 text-black ' : 'bg-gray-100 text-black'}`}
@@ -109,7 +105,7 @@ export default function RecipeComponent() {
 
       {/* Recipe Grid */}
       {currentRecipes?.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 ">
           {currentRecipes.map(recipe => (
             <div
               key={recipe._id}
@@ -132,12 +128,12 @@ export default function RecipeComponent() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center mt-6 ">
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index}
               onClick={() => paginate(index + 1)}
-              className={`mx-1 px-3 py-1 border rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+              className={`mx-1 px-3 py-1 mb-3 border rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-100 text-black'}`}
             >
               {index + 1}
             </button>
@@ -147,11 +143,11 @@ export default function RecipeComponent() {
 
       {/* Recipe Popup */}
 
-      {selectedRecipe &&
+      {selectedRecipe && (
         <div className='recipe-popup-container fixed z-50 top-0 right-0'>
           <PopCardForRecipe selectedRecipe={selectedRecipe} handleCloseRecipe={handleCloseRecipe} />
         </div>
-      }
+      )}
 
     </div>
   );

@@ -40,8 +40,8 @@ export default function ProfileDashboard() {
   };
 
   return (
-    <div className={` rounded-xl min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
-      <div className='pt-6'>
+    <div className={` relative  rounded-xl min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
+      <div className=' sticky top-0 bg-gray-800  shadow-2xl shadow-slate-950 z-10  rounded-lg' >
         <Navbar />
       </div>
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 py-8 flex flex-col lg:flex-row">

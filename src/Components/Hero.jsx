@@ -9,6 +9,9 @@ import { useSelector, useDispatch } from "react-redux";
 import Navbar from "./Navbar";
 import { getAllRecipes } from "../store/recipeSlice";
 import { gsap } from "gsap";
+import GreenCard from "./GreenCard";
+
+
 
 export default function Hero() {
     const theme = useSelector((state) => state.user.theme);
@@ -63,7 +66,7 @@ export default function Hero() {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
-        <div className="relative">
+        <div id="Home" className="relative ">
             <div className="recipe-popup-containe fixed  z-50 right-0 top-0  ">
                 {selectedRecipe && (
                     <PopCardForRecipe
@@ -75,7 +78,7 @@ export default function Hero() {
             </div>
 
             <div className={`  contrast-125 flex flex-col gap-4`} ref={heroRef}>
-                <div className={`h-[96vh] rounded-lg overflow-hidden flex flex-col w-full mx-auto transition-colors duration-300 relative`} >
+                <div  className={`h-[96vh] rounded-lg overflow-hidden flex flex-col w-full mx-auto transition-colors duration-300 relative`} >
 
                     <div className="top-0 z-50 p-6"><Navbar theme={theme} /></div>
                     {/* Video Background Section */}
@@ -125,21 +128,19 @@ export default function Hero() {
                         </div>
                     </section>
                 </div>
-
+            
                 {/* Recipes Grid Section */}
-                <section className={`md:py-5 w-full m-auto duration-300 relative`}>
-                    <div className={`rounded-2xl overflow-hidden dark-mode w-full filter brightness-95 contrast-95`}>
-                        <div className="background h-[250rem] md:h-[300vh] transition-colors w-full bg-[linear-gradient(#000000_-8%,_#00000024_10%,_#ff000000_30%,_#ffff0000_80%,_black_100%)]">
-                        </div>
-                    </div>
-                    <div className="absolute top-0 w-full px-4 sm:px-6 lg:px-8">
-                        <h3 className="text-2xl md:text-3xl lg:text-5xl text-[#FF6F61] text-shadow-lg background-transparent filter brightness-150 contrast-150 text-shadow-white font-bold text-center tracking-tight mb-4 sm:mb-8">
-                            Creative and Delicious Recipes
-                        </h3>
+                <section id="Recipes" className={`md:py-5 w-full  m-auto duration-300 relative`}>
 
+
+
+                    <div   className=" ">
+
+                        <GreenCard />
                         <div className="max-w-6xl mx-auto">
+                            <h2  className="text-4xl md:text-5xl font-bold  text-gray-800 mb-9">Our Popular Recipes</h2>
                             {currentRecipes && currentRecipes.length > 0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                                <div className=" grid grid-cols-2 lg:grid-cols-3 gap-y-3 md:gap-6 ">
                                     {currentRecipes.map((recipe) => (
                                         <RecipeCard
                                             key={recipe._id}
@@ -171,19 +172,29 @@ export default function Hero() {
                         )}
 
                         {/* Testimonials and Other Sections */}
-                        <section className={`py-8 sm:py-12 z-10 transition-colors duration-300`}>
-                            <CarouselJSX />
-                        </section>
+
 
                         <section className={`py-8 sm:py-12 transition-colors duration-300 z-10`}>
                             <UserTestimonials />
-                        </section>
 
-                        <section className={`py-8 sm:py-12 transition-colors duration-300 z-10`}>
-                            <PopularChefs />
                         </section>
                     </div>
 
+
+                        {/* how to somthing like this if your click on meet our chef link form the footer and it auto scrolles and view the popular chef component ?
+                         */}
+                         {/* <div className={`flex items-center justify-center gap-4 md:gap-8 w-full sm:w-auto h-12 transition-colors duration-300 relative`}>
+                            <Link to="#" className="text-blue-500 hover:text-blue-600 transition-colors duration-300">Meet Our Chef</Link>
+                            <div className={`absolute w-[2px] h-[12px] bg
+                            ${theme === 'dark' ? 'from-black/80 to-transparent' : 'from-white/80 to-transparent'}
+                            transition-transform duration-300 ease-in-out transform ${isOpen? 'translate-x-0' : '-translate-x-full'}`}
+                            />
+                        </div> */}
+
+
+                    <section  className={`py-8 sm:py-12 transition-colors duration-300 z-10`}>
+                    <PopularChefs />
+                    </section>
                 </section>
                 <Footer />
 
@@ -256,7 +267,7 @@ function FilterDropdown({ theme }) {
 function RecipeCard({ recipe, theme, searchTerm, onClick }) {
     return (
         <div
-            className={`border border-gray-300 rounded-lg overflow-hidden cursor-pointer transform transition-transform hover:scale-105 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}
+            className={` mx-2 md:mx-0 border border-gray-300 rounded-lg overflow-hidden cursor-pointer transform transition-transform hover:shadow-lg hover:scale-105 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}
             onClick={onClick}
         >
             <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
